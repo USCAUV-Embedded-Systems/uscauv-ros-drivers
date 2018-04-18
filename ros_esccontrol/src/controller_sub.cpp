@@ -19,7 +19,7 @@ Controller::Controller(){
 
 void Controller::chatterESCThrottle (const esccontrol_msgs::ESCThrottleConstPtr &esc_state){
 	int target_value;
-    ROS_INFO("CMD ESC throttle %d",  esc_state->motor_num);
+    ROS_INFO("CMD ESC throttle: motor %d -> %.03f",  esc_state->motor_num, esc_state->power);
 
     // ensure power is in correct range
     float power = esc_state->power;
@@ -39,7 +39,7 @@ void Controller::chatterESCThrottle (const esccontrol_msgs::ESCThrottleConstPtr 
     else
     {
         int motor_index = esc_state->motor_num;
-        int motor_port = 15 - motor_index;
+        int motor_port = 16 - motor_index;
         int us_offset_for_power = power * 300;
         int desired_us = inversions[motor_index] * (us_offset_for_power + center_points[motor_index]);
 
@@ -50,7 +50,7 @@ void Controller::chatterESCThrottle (const esccontrol_msgs::ESCThrottleConstPtr 
 
 int main(int argc, char **argv)
 {
-	ros::init(argc, argv, "controller_sub");
+	ros::init(argc, argv, "escccontrol");
 	Controller c;
     ros::spin();
 }

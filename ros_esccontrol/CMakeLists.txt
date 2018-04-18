@@ -42,7 +42,7 @@ include_directories(
    src/lib/PCA9685 src/lib/I2C ${catkin_INCLUDE_DIRS}
 )
 
-add_executable(controller_sub src/controller_sub.cpp src/lib/I2C/I2C.cpp src/lib/PCA9685/PCA9685.cpp)
-target_link_libraries(controller_sub ${catkin_LIBRARIES})
+add_executable(esccontroller src/controller_sub.cpp src/lib/I2C/I2C.cpp src/lib/PCA9685/PCA9685.cpp)
+target_link_libraries(esccontroller ${catkin_LIBRARIES})
 
 
