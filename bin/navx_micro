@@ -1,0 +1,108 @@
+#!/usr/bin/env python
+
+# USCAUV NavX Micro ROS Driver
+# Connects to the IMU over I2C at its standard address of 0x38.
+# Based on RobotPy's Python version of Kaui Labs' NavX driver (https://github.com/robotpy/robotpy-navx)
+# It provides angle data in Quaternion and Euler formats, 
+
+from __future__ import print_function
+import navx_micro
+import time
+import sys
+from periphery import I2C 
+from navx_micro._impl.imuregisters import IMURegisters
+from navx_micro._impl.ahrsprotocol import AHRSProtocol
+import binascii
+import rospy
+from std_msgs.msg import Header, Float32
+from geometry_msgs.msg import Quaternion, Vector3
+from sensor_msgs.msg import Imu
+
+# --- edit these lines to change settings ---
+port="/dev/i2c-1"
+refresh_rate=50 # Hz, from 4 to 100
+
+# Verify that IMU is connected by reading model number register
+# -------------------------------------------------
+i2c_comm = I2C(port)
+
+rospy.rospyinfo("Checking if IMU is connected...")
+i2c_comm.transfer(0x32, [I2C.Message([IMURegisters.NAVX_REG_WHOAMI, 1])])
+get_info_message = I2C.Message(bytearray(4),read=True)
+i2c_comm.transfer(0x32, [get_info_message])
+imu_modelnumber = get_info_message.data[0]
+
+if imu_modelnumber != IMURegisters.NAVX_MODEL_NAVX_MXP:
+    rospy.rospyerr("Invalid model number %x (should have been %x).  Maybe the IMU is disconnected or nonfunctional?" % (imu_modelnumber, IMURegisters.NAVX_MODEL_NAVX_MXP))
+    sys.exit(1)
+
+rospy.rospyinfo("Model number verified, IMU is connected and working.")
+i2c_comm.close()
+
+# Start node
+# -------------------------------------------------
+
+navx = navx.AHRS.create_i2c(port, 50)
+
+imu_pub = rospy.Publisher('navx_micro/imu', Imu, queue_size=10) 
+euler_pub = rospy.Publisher('navx_micro/euler', Vector3, queue_size=10) 
+yaw_rate_pub = rospy.Publisher('navx_micro/yaw_rate', Float32, queue_size=10) 
+fused_yaw_pub = rospy.Publisher('navx_micro/fused_yaw', Float32, queue_size=10) # "fused" yaw takes the compass reading into account
+
+
+imu_msg = Imu()
+imu_msg.header = Header()
+imu_msg.header.frame_id = 0
+imu_msg.orientation_covariance = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+imu_msg.angular_velocity_covariance  = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+imu_msg.linear_acceleration_covariance  = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+# RobotPy's NavX driver does not support pitch and roll rates
+imu_msg.angular_velocity.x = 0
+imu_msg.angular_velocity.y = 0
+
+euler_msg = Vector3Header()
+euler_msg.header = Header()
+euler_msg.header.frame_id = 0
+
+yaw_rate_msg = Float32()
+fused_yaw_msg = Float32()
+
+# ID used for message headers
+seq_id = 1
+
+while not rospy.is_shutdown():
+		time.sleep(1.0/refresh_rate)
+		
+		# send Euler angles
+		print("Pitch: %.02f, Roll: %.02f, Yaw: %.02f" % (navx.getPitch(), navx.getRoll(), navx.getYaw()))
+		euler_msg.vector.x = navx.getPitch()
+		euler_msg.vector.y = navx.getRoll()
+		euler_msg.vector.z = navx.getYaw()
+		euler_msg.header.seq = seq_id
+		euler_msg.header.stamp = rospy.Time.now()
+		euler_pub.publish(euler_msg)
+		
+		imu_msg.header.seq = seq_id
+		imu_msg.header.stamp = rospy.Time.now()
+		imu_msg.orientation.x = navx.getQuaternionX()
+		imu_msg.orientation.y = navx.getQuaternionW()
+		imu_msg.orientation.z = navx.getQuaternionZ()
+		imu_msg.orientation.w = navx.getQuaternionW()
+		imu_msg.angular_velocity.z = ahrs.getRate()
+		imu_msg.linear_acceleration.x = navx.getWorldLinearAccelX()
+		imu_msg.linear_acceleration.y = navx.getWorldLinearAccelX()
+		imu_msg.linear_acceleration.z = navx.getWorldLinearAccelX()
+		imu_pub.publish(imu_msg)
+		
+		yaw_rate_msg = ahrs.getRate()
+		yaw_rate_pub.publish(yaw_rate_msg)
+		
+		fused_yaw_msg = ahrs.getFusedHeading()
+		fused_yaw_pub.publish(fused_yaw_msg)
+		
+		seq_id += 1
+		
+navx.registerCallback(newDataCallback)
+
+rospy.init_node('navx_micro')
+rospy.spin()
