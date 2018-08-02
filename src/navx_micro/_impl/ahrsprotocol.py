@@ -10,6 +10,8 @@
 #----------------------------------------------------------------------------
 
 from .imuprotocol import IMUProtocol
+import struct
+import binascii
 
 class AHRSProtocol(IMUProtocol):
     
@@ -321,56 +323,57 @@ class AHRSProtocol(IMUProtocol):
 
     @staticmethod
     def decodeBinaryUint16(data, offset):
-        return int.from_bytes(data[offset:offset+2], 'little', signed=False)
+        return struct.unpack("<H", "".join(map(chr, data[offset:offset+2])))[0]
     
     @staticmethod
     def encodeBinaryUint16(i, data, offset):
-        data[offset:offset+2] = i.to_bytes(2, 'little', signed=False)
+        data[offset:offset+2] = struct.pack("<H", i)[0:1]
     
     @staticmethod
     def decodeBinaryInt16(data, offset):
-        return int.from_bytes(data[offset:offset+2], 'little', signed=True)
+        return struct.unpack("<h", "".join(map(chr, data[offset:offset+2])))[0]
     
     @staticmethod
     def decodeBinaryUint32(data, offset):
-        return int.from_bytes(data[offset:offset+4], 'little', signed=False)
+        return struct.unpack("<I", "".join(map(chr, data[offset:offset+4])))[0]
     
     @staticmethod
     def encodeBinaryInt16(i, data, offset):
-        data[offset:offset+2] = i.to_bytes(2, 'little', signed=True)
+        data[offset:offset+2] = struct.pack("<h", i)[0:2]
         
     @staticmethod
     def encodeBinaryUint32(i, data, offset):
-        data[offset:offset+4] = i.to_bytes(4, 'little', signed=False)
+        data[offset:offset+4] = struct.pack("<I", i)[0:4]
 
     @staticmethod
     def decodeProtocol1616Float(data, offset):
-        return int.from_bytes(data[offset:offset+4], 'little', signed=True)/65536.0
+        return struct.unpack("<i", "".join(map(chr, data[offset:offset+4])))[0]/65536.0
     
     @staticmethod
     def encodeProtocol1616Float(f, data, offset):
-        data[offset:offset+4] = int(f*65536).to_bytes(4, 'little', signed=True)
+        data[offset:offset+4] = struct.pack("<i", int(f*65536))[0:4]
     
     @staticmethod
     def decodeProtocolSignedHundredthsFloat(data, offset):
-        return int.from_bytes(data[offset:offset+2], 'little', signed=True)/100.0
+        #print "Unpacking " + binascii.hexlify(bytearray(data[offset:offset+2])) + " as " + str(struct.unpack("<h", "".join(map(chr, data[offset:offset+2])))[0]/100.0)
+        return struct.unpack("<h", "".join(map(chr, data[offset:offset+2])))[0]/100.0
     
     @staticmethod
     def encodeProtocolSignedHundredthsFloat(f, data, offset):
-        data[offset:offset+2] = int(f*100).to_bytes(2, 'little', signed=True)
+        data[offset:offset+2] = struct.pack("<h", int(f*100))[0:2]
     
     @staticmethod
     def decodeProtocolSignedThousandthsFloat(data, offset):
-        return int.from_bytes(data[offset:offset+2], 'little', signed=True)/1000.0
+        return struct.unpack("<h", "".join(map(chr, data[offset:offset+2])))[0]/1000.0
     
     @staticmethod
     def encodeProtocolSignedThousandthsFloat(f, data, offset):
-        data[offset:offset+2] = int(f*1000).to_bytes(2, 'little', signed=True)
+        data[offset:offset+2] = struct.pack("<h", int(f*1000))[0:2]
     
     @staticmethod
     def decodeProtocolUnsignedHundredthsFloat(data, offset):
-        return int.from_bytes(data[offset:offset+2], 'little', signed=False)/100.0
+        return struct.unpack("<H", "".join(map(chr, data[offset:offset+2])))[0]/100.0
     
     @staticmethod
     def encodeProtocolUnsignedHundredthsFloat(f, data, offset):
-        data[offset:offset+2] = int(f*100).to_bytes(2, 'little', signed=False)
+        data[offset:offset+2] = struct.pack("<H", int(f*100))[0:2]

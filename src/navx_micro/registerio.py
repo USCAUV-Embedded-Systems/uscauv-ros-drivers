@@ -122,6 +122,8 @@ class RegisterIO:
                     
                 time.sleep(update_rate)
         except Exception:
+            import traceback
+            traceback.print_exc()
             logger.exception("Unhandled exception in NavX thread")
         finally:
             logger.info("NavX i/o thread exiting")

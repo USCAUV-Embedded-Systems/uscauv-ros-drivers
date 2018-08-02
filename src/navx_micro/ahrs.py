@@ -67,7 +67,7 @@ class AHRS(object):
         :param port: I2C Port to use (string name of device in /dev)
         :param update_rate_hz: Custom Update Rate (Hz)
         """
-        
+		
         io = RegisterIO_I2C(port)
         return AHRS(io, update_rate_hz)
     
@@ -148,8 +148,8 @@ class AHRS(object):
         self.callbacks = []
         
         self.io = RegisterIO(io, self.update_rate_hz, self, self)
-        self.ioThread = threading.Thread(target=self.io.run, name='NavX',
-                                         daemon=True)
+        self.ioThread = threading.Thread(target=self.io.run, name='NavX')
+        self.ioThread.daemon = True
         
         self.ioThread.start()
     
@@ -1033,8 +1033,8 @@ class AHRS(object):
             callback(o, sensor_timestamp)
     
     def _setBoardID(self, o):
-        with self.mutex:
-            self.__dict__.update(o.__dict__)
+        #with self.mutex:
+        self.__dict__.update(o.__dict__)
     
     def _setBoardState(self, o):
         with self.mutex:
