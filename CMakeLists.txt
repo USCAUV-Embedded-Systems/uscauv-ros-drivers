@@ -8,8 +8,14 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
-  esccontrol_msgs
+  message_generation
 )
+
+add_message_files(FILES
+		  ESCThrottle.msg)
+		  
+generate_messages(DEPENDENCIES std_msgs)
+
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -25,10 +31,10 @@ find_package(catkin REQUIRED COMPONENTS
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
+  INCLUDE_DIRS include
 #  LIBRARIES ros_esccontrol
 #  CATKIN_DEPENDS roscpp rospy std_msgs
-#  DEPENDS system_lib
+  DEPENDS std_msgs
 )
 
 ###########

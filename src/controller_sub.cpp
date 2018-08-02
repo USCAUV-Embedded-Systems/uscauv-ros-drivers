@@ -3,7 +3,7 @@
 #define NUM_ESC 6
 
 // calibration values for each ESC
-const static int center_points[] = {1570, 1565, 1570, 1570, 1570, 1500};
+const static int center_points[] = {1570, 1565, 1570, 1570, 1570, 1570};
 const static int8_t inversions[] = {-1, 1, -1, -1, 1, 1};
 
 // "radius" of the PWM signal sent to the motors -- distanct in us from center point to full forward or reverse
@@ -13,6 +13,7 @@ Controller::Controller(){
 
 	controller = new PCA9685(I2C_BUS, I2C_ADDRESS);
  	controller->setPWMFreq(250);
+	
 	sub_esc = node.subscribe("esccontrol/esc_throttle", 100, &Controller::chatterESCThrottle, this);
 	ROS_INFO("ESC controller is ready...");
 }
@@ -29,7 +30,7 @@ void Controller::chatterESCThrottle (const esccontrol_msgs::ESCThrottleConstPtr 
     }
     else if(power < -1)
     {
-    	power = 1.0;
+    	power = -1.0;
     }
 
     if(esc_state->motor_num <= 0 || esc_state->motor_num > NUM_ESC)
@@ -38,12 +39,18 @@ void Controller::chatterESCThrottle (const esccontrol_msgs::ESCThrottleConstPtr 
     }
     else
     {
-        int motor_index = esc_state->motor_num;
-        int motor_port = 16 - motor_index;
-        int us_offset_for_power = power * 300;
-        int desired_us = inversions[motor_index] * (us_offset_for_power + center_points[motor_index]);
-
-        controller->setPWM(motor_port, (desired_us / 4000.0) * 4095);
+        int motor_index = esc_state->motor_num - 1;
+        int motor_port = esc_state->motor_num;
+        int us_offset_for_power = power * 200; 
+		//ROS_INFO("us_offset_for_power: %d", us_offset_for_power);
+		//ROS_INFO("inversions[motor_index]: %d", inversions[motor_index]);
+		//ROS_INFO("center_points[motor_index]: %d", center_points[motor_index]);
+		
+        int desired_us = (inversions[motor_index] * us_offset_for_power) + center_points[motor_index];
+		int pwm_time = static_cast<int>((desired_us / 4000.0) * 4095);
+		
+		ROS_INFO("Setting PWM %d to %d", motor_port, pwm_time);
+        controller->setPWM(motor_port, pwm_time);
     }
 }
 
