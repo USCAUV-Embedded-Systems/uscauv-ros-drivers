@@ -60,13 +60,6 @@ public:
 	straightDriveStatePublisher(node.advertise<std_msgs::Float64>("/straight_drive_pid/state", QUEUE_SIZE)),
 	imuSubscriber(node.subscribe("/navx_micro/euler", QUEUE_SIZE, &TurtleMotion::chatterNavxEuler, this))
 	{
-		ros_esccontrol::setMotor(M_HORIZ_LEFT, 0, throttlePublisher);
-		ros_esccontrol::setMotor(M_HORIZ_RIGHT, 0, throttlePublisher);
-		ros_esccontrol::setMotor(M_VERT_FRONTLEFT, 0, throttlePublisher);
-		ros_esccontrol::setMotor(M_VERT_FRONTRIGHT, 0, throttlePublisher);
-		ros_esccontrol::setMotor(M_VERT_BACKLEFT, 0, throttlePublisher);
-		ros_esccontrol::setMotor(M_VERT_BACKRIGHT, 0, throttlePublisher);
-		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 		//ros_esccontrol::setMotor(M_HORIZ_LEFT, .5, throttlePublisher);
 		//ros_esccontrol::setMotor(M_HORIZ_RIGHT, .5, throttlePublisher);
 		//std::this_thread::sleep_for(std::chrono::milliseconds(1000));
@@ -88,9 +81,21 @@ public:
 			ros::spinOnce();
 		}
 		
+		ROS_INFO("Got initial IMU data, waiting...", request.time);
+		
+		ros_esccontrol::setMotor(M_HORIZ_LEFT, 0, throttlePublisher);
+		ros_esccontrol::setMotor(M_HORIZ_RIGHT, 0, throttlePublisher);
+		ros_esccontrol::setMotor(M_VERT_FRONTLEFT, 0, throttlePublisher);
+		ros_esccontrol::setMotor(M_VERT_FRONTRIGHT, 0, throttlePublisher);
+		ros_esccontrol::setMotor(M_VERT_BACKLEFT, 0, throttlePublisher);
+		ros_esccontrol::setMotor(M_VERT_BACKRIGHT, 0, throttlePublisher);
+		//std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+		//ros_esccontrol::setMotor(M_VERT_BACKLEFT, -.15, throttlePublisher);
+		//ros_esccontrol::setMotor(M_VERT_BACKRIGHT, -.15, throttlePublisher);
+		std::this_thread::sleep_for(std::chrono::milliseconds(20000));
 		
 		ROS_INFO("Going straight for %.02f seconds", request.time);
-				
+		ros::spinOnce();	
 				
 		// set PID initial state
 		float initialAngle = imuYaw;
@@ -101,19 +106,19 @@ public:
 		ros::Duration runDuration(request.time);
 		ros::Time endTime = ros::Time::now() + runDuration;
 		ros::Time startTime = ros::Time::now();
-		ros::Time diveTime = ros::Time::now() + ros::Duration(.750);
+		ros::Time diveTime = ros::Time::now() + ros::Duration(.50);
 		ros::Time hoverTime = diveTime + ros::Duration(.750);
 		
-		float initialPower = .5;
-		ros_esccontrol::setMotor(M_HORIZ_LEFT, initialPower, throttlePublisher);
-		ros_esccontrol::setMotor(M_HORIZ_RIGHT, initialPower, throttlePublisher);
+		const float initialPower = .5;
+		float currentBasePower = 0;
+		
 		
 		float integral = 0;
 		float prevError = 0;
 		
-		const float kP = .02;
-		const float kI = .0001;
-		const float kD = 0;
+		const float kP = .05;
+		const float kI = .00015;
+		const float kD = .04;
 		
 		bool doneStarting = false;
 		bool doneDiving = false;
@@ -126,22 +131,29 @@ public:
 			{
 				if(ros::Time::now() > diveTime)
 				{
+					//ROS_INFO("Diving...");
 					ros_esccontrol::setMotor(M_VERT_FRONTLEFT, -.5, throttlePublisher);
 					ros_esccontrol::setMotor(M_VERT_FRONTRIGHT, -.5, throttlePublisher);
 					ros_esccontrol::setMotor(M_VERT_BACKLEFT, -.5, throttlePublisher);
 					ros_esccontrol::setMotor(M_VERT_BACKRIGHT, -.5, throttlePublisher);
+					doneStarting = true;
+
 				}
+				
 			}
-			if(!doneDiving)
+			else if(!doneDiving)
 			{
 				if(ros::Time::now() > hoverTime)
 				{
+					//ROS_INFO("Hovering...");
 					ros_esccontrol::setMotor(M_VERT_FRONTLEFT, -.15, throttlePublisher);
-					ros_esccontrol::setMotor(M_VERT_FRONTRIGHT, -.15, throttlePublisher);
-					ros_esccontrol::setMotor(M_VERT_BACKLEFT, -.15, throttlePublisher);
-					ros_esccontrol::setMotor(M_VERT_BACKRIGHT, -.15, throttlePublisher);
+					ros_esccontrol::setMotor(M_VERT_FRONTRIGHT, -.09, throttlePublisher);
+					ros_esccontrol::setMotor(M_VERT_BACKLEFT, -.21, throttlePublisher);
+					ros_esccontrol::setMotor(M_VERT_BACKRIGHT, -.21, throttlePublisher);
+					currentBasePower = initialPower;
+					doneDiving = true;
+
 				}
-				doneDiving = false;
 			}
 			
 			updateRate.sleep();
@@ -169,8 +181,8 @@ public:
 			float I = kI * integral;
 			float D = -1 * kD * (error-prevError);
 			float pidCorrection = P + I + D;
-			float leftPower = initialPower + pidCorrection;
-			float rightPower = initialPower - pidCorrection;
+			float leftPower = currentBasePower + pidCorrection;
+			float rightPower = currentBasePower - pidCorrection;
 			
 			prevError = error;
 			
@@ -179,7 +191,7 @@ public:
 			ros_esccontrol::setMotor(M_HORIZ_LEFT, leftPower, throttlePublisher);
 			ros_esccontrol::setMotor(M_HORIZ_RIGHT, rightPower, throttlePublisher);
 			
-			ROS_INFO("%.04f, %.04f, %.04f, %.04f, %.04f, %,04f, %.04f, %.04f, %.04f",
+			ROS_INFO("%.04f, %.04f, %.04f, %.04f, %.04f, %.04f, %.04f, %.04f, %.04f",
 				initialAngle, currentAngle, error, P, I, D, pidCorrection, leftPower, rightPower);
 			
 			ros::spinOnce();
@@ -191,6 +203,10 @@ public:
 		ros_esccontrol::setMotor(M_VERT_FRONTRIGHT, 0, throttlePublisher);
 		ros_esccontrol::setMotor(M_VERT_BACKLEFT, 0, throttlePublisher);
 		ros_esccontrol::setMotor(M_VERT_BACKRIGHT, 0, throttlePublisher);
+		
+		ros_esccontrol::setMotor(M_HORIZ_RIGHT, .75, throttlePublisher);
+		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+		ros_esccontrol::setMotor(M_HORIZ_RIGHT, 0, throttlePublisher);
 		
 	}
 };
@@ -205,10 +221,10 @@ int main(int argc, char **argv)
 		
 	uscturtle_motion::TurtleMotion turtleMotion;
 	
-	turtleMotion.node.advertiseService<uscturtle_motion::TurtleMotion, uscturtle_motion::GoStraightRequest, uscturtle_motion::GoStraightResponse>("GoStraight", &uscturtle_motion::TurtleMotion::goStraight, &turtleMotion);
+	//turtleMotion.node.advertiseService<uscturtle_motion::TurtleMotion, uscturtle_motion::GoStraightRequest, uscturtle_motion::GoStraightResponse>("GoStraight", &uscturtle_motion::TurtleMotion::goStraight, &turtleMotion);
 	
 	uscturtle_motion::GoStraightRequest request;
-	request.time = 80;
+	request.time = 90;
 	uscturtle_motion::GoStraightResponse response;
 	turtleMotion.goStraight(request, response);
 	

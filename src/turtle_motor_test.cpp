@@ -26,7 +26,7 @@ int main(int argc, char** argv)
 	ros_esccontrol::setMotor(M_VERT_FRONTRIGHT, 0, throttlePublisher);
 	ros_esccontrol::setMotor(M_VERT_BACKLEFT, 0, throttlePublisher);
 	ros_esccontrol::setMotor(M_VERT_BACKRIGHT, 0, throttlePublisher);
-	
+		
 	ROS_INFO("Starting motor test.  All motors should run forwards (towards the front or top of the robot)");
 	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	
