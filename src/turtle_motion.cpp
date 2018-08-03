@@ -11,6 +11,8 @@
 // generated header file for this service
 #include <uscturtle_motion/GoStraight.h>
 
+#include "angle_pid.h"
+
 #define QUEUE_SIZE 10
 
 namespace uscturtle_motion
@@ -20,11 +22,11 @@ class TurtleMotion
 {
 public:
 	ros::NodeHandle node;
-private:
 	
 	// publishers and subscribers
 	ros::Publisher throttlePublisher;
 
+private:
 	ros::Publisher straightDriveSetpointPublisher;
 	ros::Publisher straightDriveStatePublisher;
 	
@@ -81,18 +83,8 @@ public:
 			ros::spinOnce();
 		}
 		
-		ROS_INFO("Got initial IMU data, waiting...", request.time);
+		ROS_INFO("Got initial IMU data, waiting...");
 		
-		ros_esccontrol::setMotor(M_HORIZ_LEFT, 0, throttlePublisher);
-		ros_esccontrol::setMotor(M_HORIZ_RIGHT, 0, throttlePublisher);
-		ros_esccontrol::setMotor(M_VERT_FRONTLEFT, 0, throttlePublisher);
-		ros_esccontrol::setMotor(M_VERT_FRONTRIGHT, 0, throttlePublisher);
-		ros_esccontrol::setMotor(M_VERT_BACKLEFT, 0, throttlePublisher);
-		ros_esccontrol::setMotor(M_VERT_BACKRIGHT, 0, throttlePublisher);
-		//std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-		//ros_esccontrol::setMotor(M_VERT_BACKLEFT, -.15, throttlePublisher);
-		//ros_esccontrol::setMotor(M_VERT_BACKRIGHT, -.15, throttlePublisher);
-		std::this_thread::sleep_for(std::chrono::milliseconds(20000));
 		
 		ROS_INFO("Going straight for %.02f seconds", request.time);
 		ros::spinOnce();	
@@ -112,18 +104,11 @@ public:
 		const float initialPower = .5;
 		float currentBasePower = 0;
 		
-		
-		float integral = 0;
-		float prevError = 0;
-		
-		const float kP = .05;
-		const float kI = .00015;
-		const float kD = .04;
+		AnglePID<float> pidCalculator(true, .05, .0075, .0008, initialAngle, .5);
 		
 		bool doneStarting = false;
 		bool doneDiving = false;
-		
-		ROS_INFO("target, current, error, P, I, D, correction, leftPower, rightPower");
+	
 		
 		while(endTime > ros::Time::now())
 		{
@@ -157,42 +142,15 @@ public:
 			}
 			
 			updateRate.sleep();
-			
-			float currentAngle = imuYaw;
-			
-			// calculate angluar error
-			float error;
-
-			if(currentAngle > 270.0 && initialAngle < 90.0)
-			{
-				error = (currentAngle - 360) - initialAngle;
-			}
-			else if(currentAngle < 90.0 && initialAngle > 270.0)
-			{
-				error = currentAngle - (initialAngle - 360.0);
-			}
-			else
-			{
-				error = currentAngle - initialAngle;
-			}
 						
-			integral += error;
-			float P = kP * error;
-			float I = kI * integral;
-			float D = -1 * kD * (error-prevError);
-			float pidCorrection = P + I + D;
+			float pidCorrection = pidCalculator.update(imuYaw);
 			float leftPower = currentBasePower + pidCorrection;
 			float rightPower = currentBasePower - pidCorrection;
-			
-			prevError = error;
-			
+						
 			// if we turn to the left, the error will be positive, so in the case of a positive correction, make the left motors
 			// spin faster and the right motors spin slower.
 			ros_esccontrol::setMotor(M_HORIZ_LEFT, leftPower, throttlePublisher);
 			ros_esccontrol::setMotor(M_HORIZ_RIGHT, rightPower, throttlePublisher);
-			
-			ROS_INFO("%.04f, %.04f, %.04f, %.04f, %.04f, %.04f, %.04f, %.04f, %.04f",
-				initialAngle, currentAngle, error, P, I, D, pidCorrection, leftPower, rightPower);
 			
 			ros::spinOnce();
 		}
@@ -203,10 +161,67 @@ public:
 		ros_esccontrol::setMotor(M_VERT_FRONTRIGHT, 0, throttlePublisher);
 		ros_esccontrol::setMotor(M_VERT_BACKLEFT, 0, throttlePublisher);
 		ros_esccontrol::setMotor(M_VERT_BACKRIGHT, 0, throttlePublisher);
+
+		return true;
+	}
+	
+	// sets the right motors to arc turn to the left
+	bool arcTurnLeft(float degrees)
+	{
+		ros::Rate updateRate(50);
+		ros::Rate callbackWaitRate(25);
 		
-		ros_esccontrol::setMotor(M_HORIZ_RIGHT, .75, throttlePublisher);
-		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+		// allow time for the first IMU callback to be delivered
+		while(std::abs(imuYaw) < .00001)
+		{
+			ROS_WARN("Waiting for IMU data");
+			callbackWaitRate.sleep();
+			ros::spinOnce();
+		}
+		
+		ROS_INFO("Got initial IMU data, waiting...");
+		
+		
+		ROS_INFO("Arcing left");
+		ros::spinOnce();	
+				
+		// set PID initial state
+		float initialAngle = imuYaw;
+		
+		ROS_INFO("Initial angle is %.02f degrees", initialAngle);
+		
+		// hover!
+		ros_esccontrol::setMotor(M_VERT_FRONTLEFT, -.15, throttlePublisher);
+		ros_esccontrol::setMotor(M_VERT_FRONTRIGHT, -.09, throttlePublisher);
+		ros_esccontrol::setMotor(M_VERT_BACKLEFT, -.21, throttlePublisher);
+		ros_esccontrol::setMotor(M_VERT_BACKRIGHT, -.21, throttlePublisher);
+		
+		const float basePower = .5;
+		
+		AnglePID<float> pidCalculator(true, .05, .0075, .0008, initialAngle, .5);
+	
+		// wait for 5 consecutive good values
+		while(pidCalculator.getCyclesUnderThreshold() < 5)
+		{	
+			updateRate.sleep();
+						
+			float pidCorrection = pidCalculator.update(imuYaw);
+			float rightPower = basePower - pidCorrection;
+						
+			// if we turn to the left, the error will be positive, so in the case of a positive correction, make the left motors
+			// spin faster and the right motors spin slower.
+			ros_esccontrol::setMotor(M_HORIZ_RIGHT, rightPower, throttlePublisher);
+			
+			ros::spinOnce();
+		}
+		
+		ros_esccontrol::setMotor(M_HORIZ_LEFT, 0, throttlePublisher);
 		ros_esccontrol::setMotor(M_HORIZ_RIGHT, 0, throttlePublisher);
+		ros_esccontrol::setMotor(M_VERT_FRONTLEFT, 0, throttlePublisher);
+		ros_esccontrol::setMotor(M_VERT_FRONTRIGHT, 0, throttlePublisher);
+		ros_esccontrol::setMotor(M_VERT_BACKLEFT, 0, throttlePublisher);
+		ros_esccontrol::setMotor(M_VERT_BACKRIGHT, 0, throttlePublisher);
+
 		
 	}
 };
@@ -221,12 +236,23 @@ int main(int argc, char **argv)
 		
 	uscturtle_motion::TurtleMotion turtleMotion;
 	
-	//turtleMotion.node.advertiseService<uscturtle_motion::TurtleMotion, uscturtle_motion::GoStraightRequest, uscturtle_motion::GoStraightResponse>("GoStraight", &uscturtle_motion::TurtleMotion::goStraight, &turtleMotion);
+	//turtleMotion.node.advertiseService<uscturtle_motion::TurtleMotion, uscturtle_motion::GoStraightRequest, 
+	//	uscturtle_motion::GoStraightResponse>("GoStraight", &uscturtle_motion::TurtleMotion::goStraight, &turtleMotion);
+	
+	ros_esccontrol::setMotor(M_HORIZ_LEFT, 0, turtleMotion.throttlePublisher);
+	ros_esccontrol::setMotor(M_HORIZ_RIGHT, 0, turtleMotion.throttlePublisher);
+	ros_esccontrol::setMotor(M_VERT_FRONTLEFT, 0, turtleMotion.throttlePublisher);
+	ros_esccontrol::setMotor(M_VERT_FRONTRIGHT, 0, turtleMotion.throttlePublisher);
+	ros_esccontrol::setMotor(M_VERT_BACKLEFT, 0, turtleMotion.throttlePublisher);
+	ros_esccontrol::setMotor(M_VERT_BACKRIGHT, 0, turtleMotion.throttlePublisher);
+	std::this_thread::sleep_for(std::chrono::milliseconds(20000));
 	
 	uscturtle_motion::GoStraightRequest request;
 	request.time = 90;
 	uscturtle_motion::GoStraightResponse response;
 	turtleMotion.goStraight(request, response);
+	
+	turtleMotion.arcTurnLeft(90);
 	
 	ros::shutdown();
 	
