@@ -70,7 +70,7 @@ public:
 	}
 	
 	
-	bool goStraight(GoStraightRequest & request, GoStraightResponse & response)
+	bool goStraight(GoStraightRequest & request, GoStraightResponse & response, float diveTimeSec)
 	{
 		ros::Rate updateRate(50);
 		ros::Rate callbackWaitRate(25);
@@ -99,12 +99,12 @@ public:
 		ros::Time endTime = ros::Time::now() + runDuration;
 		ros::Time startTime = ros::Time::now();
 		ros::Time diveTime = ros::Time::now() + ros::Duration(.50);
-		ros::Time hoverTime = diveTime + ros::Duration(.750);
+		ros::Time hoverTime = diveTime + ros::Duration(diveTimeSec);
 		
 		const float initialPower = .5;
 		float currentBasePower = 0;
 		
-		AnglePID<float> pidCalculator(true, .05, .0075, .0008, initialAngle, .5);
+		AnglePID<float> pidCalculator(false, .05, .0075, .0008, initialAngle, .5);
 		
 		bool doneStarting = false;
 		bool doneDiving = false;
@@ -165,8 +165,8 @@ public:
 		return true;
 	}
 	
-	// sets the right motors to arc turn to the left
-	bool arcTurnLeft(float degrees)
+	// Turn the given amount of degrees
+	bool turn(float degrees)
 	{
 		ros::Rate updateRate(50);
 		ros::Rate callbackWaitRate(25);
@@ -193,24 +193,35 @@ public:
 		// hover!
 		ros_esccontrol::setMotor(M_VERT_FRONTLEFT, -.15, throttlePublisher);
 		ros_esccontrol::setMotor(M_VERT_FRONTRIGHT, -.09, throttlePublisher);
-		ros_esccontrol::setMotor(M_VERT_BACKLEFT, -.21, throttlePublisher);
-		ros_esccontrol::setMotor(M_VERT_BACKRIGHT, -.21, throttlePublisher);
-		
-		const float basePower = .5;
-		
-		AnglePID<float> pidCalculator(true, .05, .0075, .0008, initialAngle, .5);
+		ros_esccontrol::setMotor(M_VERT_BACKLEFT, -.22, throttlePublisher);
+		ros_esccontrol::setMotor(M_VERT_BACKRIGHT, -.22, throttlePublisher);
+				
+		AnglePID<float> pidCalculator(true, .06, 0.0, .001, initialAngle + degrees, 2);
 	
 		// wait for 5 consecutive good values
-		while(pidCalculator.getCyclesUnderThreshold() < 5)
+		while(pidCalculator.getCyclesUnderThreshold() < 50)
 		{	
 			updateRate.sleep();
 						
 			float pidCorrection = pidCalculator.update(imuYaw);
-			float rightPower = basePower - pidCorrection;
+			
+			if(pidCorrection > .5)
+			{
+				pidCorrection = .5;
+			}
+			else if(pidCorrection < -.5)
+			{
+				pidCorrection = -.5;
+			}
+			
+			float leftPower = pidCorrection;
+			float rightPower = -1 * pidCorrection;
+			
 						
 			// if we turn to the left, the error will be positive, so in the case of a positive correction, make the left motors
 			// spin faster and the right motors spin slower.
-			ros_esccontrol::setMotor(M_HORIZ_RIGHT, rightPower, throttlePublisher);
+			ros_esccontrol::setMotor(M_HORIZ_LEFT, leftPower, throttlePublisher);
+			ros_esccontrol::setMotor(M_HORIZ_RIGHT, rightPower, throttlePublisher);  
 			
 			ros::spinOnce();
 		}
@@ -248,11 +259,14 @@ int main(int argc, char **argv)
 	std::this_thread::sleep_for(std::chrono::milliseconds(20000));
 	
 	uscturtle_motion::GoStraightRequest request;
-	request.time = 90;
+	request.time = 9;
 	uscturtle_motion::GoStraightResponse response;
-	turtleMotion.goStraight(request, response);
+	turtleMotion.goStraight(request, response, .75);
 	
-	turtleMotion.arcTurnLeft(90);
+	turtleMotion.turn(-15);
+	
+	request.time = 5;
+	turtleMotion.goStraight(request, response, 0);
 	
 	ros::shutdown();
 	
