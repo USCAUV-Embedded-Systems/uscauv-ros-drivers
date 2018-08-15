@@ -9,13 +9,13 @@
 #include <cmath>
 
 // generated header file for this service
-#include <uscturtle_motion/GoStraight.h>
+#include <motion_controller/GoStraight.h>
 
 #include "angle_pid.h"
 
 #define QUEUE_SIZE 10
 
-namespace uscturtle_motion
+namespace motion_controller
 {
 
 class TurtleMotion
@@ -245,10 +245,10 @@ int main(int argc, char **argv)
 {
 	ros::init(argc, argv, "turtle_motion");
 		
-	uscturtle_motion::TurtleMotion turtleMotion;
+	motion_controller::TurtleMotion turtleMotion;
 	
-	//turtleMotion.node.advertiseService<uscturtle_motion::TurtleMotion, uscturtle_motion::GoStraightRequest, 
-	//	uscturtle_motion::GoStraightResponse>("GoStraight", &uscturtle_motion::TurtleMotion::goStraight, &turtleMotion);
+	//turtleMotion.node.advertiseService<motion_controller::TurtleMotion, motion_controller::GoStraightRequest, 
+	//	motion_controller::GoStraightResponse>("GoStraight", &motion_controller::TurtleMotion::goStraight, &turtleMotion);
 	
 	ros_esccontrol::setMotor(M_HORIZ_LEFT, 0, turtleMotion.throttlePublisher);
 	ros_esccontrol::setMotor(M_HORIZ_RIGHT, 0, turtleMotion.throttlePublisher);
@@ -258,9 +258,9 @@ int main(int argc, char **argv)
 	ros_esccontrol::setMotor(M_VERT_BACKRIGHT, 0, turtleMotion.throttlePublisher);
 	std::this_thread::sleep_for(std::chrono::milliseconds(20000));
 	
-	uscturtle_motion::GoStraightRequest request;
+	motion_controller::GoStraightRequest request;
 	request.time = 9;
-	uscturtle_motion::GoStraightResponse response;
+	motion_controller::GoStraightResponse response;
 	turtleMotion.goStraight(request, response, .75);
 	
 	turtleMotion.turn(-15);

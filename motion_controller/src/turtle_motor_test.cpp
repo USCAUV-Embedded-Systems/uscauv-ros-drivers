@@ -8,9 +8,6 @@
 #include <thread>
 #include <cmath>
 
-// generated header file for this service
-#include <uscturtle_motion/GoStraight.h>
-
 #define QUEUE_SIZE 10
 
 int main(int argc, char** argv)

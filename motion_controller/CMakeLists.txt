@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(uscturtle_motion)
+project(motion_controller)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -49,9 +49,10 @@ include_directories(
    ${catkin_INCLUDE_DIRS}
 )
 
-add_executable(uscturtle_motion src/turtle_motion.cpp)
-target_link_libraries(uscturtle_motion ${catkin_LIBRARIES})
+add_executable(motion_controller src/turtle_motion.cpp)
+target_link_libraries(motion_controller ${catkin_LIBRARIES})
+add_dependencies(motion_controller motion_controller_generate_messages_cpp ros_esccontrol_generate_messages_cpp)
 
-add_executable(uscturtle_motor_test src/turtle_motor_test.cpp)
-target_link_libraries(uscturtle_motor_test ${catkin_LIBRARIES})
+add_executable(motor_test src/turtle_motor_test.cpp)
+target_link_libraries(motor_test ${catkin_LIBRARIES})
 
