@@ -29,7 +29,7 @@
 #include <linux/i2c.h>
 #include <linux/i2c-dev.h>
 #include <ros/ros.h>
-#include "I2C.h"
+#include <i2c_cpp/I2C.h>
 
 I2C::I2C(int bus, int address) {
 	_i2cbus = bus;

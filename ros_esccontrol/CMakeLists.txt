@@ -7,6 +7,7 @@ project(ros_esccontrol)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
+  i2c_cpp
   std_msgs
   message_generation
 )
@@ -32,8 +33,6 @@ generate_messages(DEPENDENCIES std_msgs)
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-#  LIBRARIES ros_esccontrol
-#  CATKIN_DEPENDS roscpp rospy std_msgs
   DEPENDS std_msgs
 )
 
@@ -45,10 +44,10 @@ catkin_package(
 ## Your package locations should be listed before other locations
 # include_directories(include)
 include_directories(
-   src/lib/PCA9685 src/lib/I2C ${catkin_INCLUDE_DIRS}
+   src/lib/PCA9685 ${catkin_INCLUDE_DIRS}
 )
 
-add_executable(esccontroller src/controller_sub.cpp src/lib/I2C/I2C.cpp src/lib/PCA9685/PCA9685.cpp)
+add_executable(esccontroller src/controller_sub.cpp src/lib/PCA9685/PCA9685.cpp)
 target_link_libraries(esccontroller ${catkin_LIBRARIES})
 
 
