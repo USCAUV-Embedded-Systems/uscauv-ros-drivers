@@ -18,7 +18,7 @@ Controller::Controller(){
 	ROS_INFO("ESC controller is ready...");
 }
 
-void Controller::chatterESCThrottle (const esccontrol_msgs::ESCThrottleConstPtr &esc_state){
+void Controller::chatterESCThrottle (const ros_esccontrol::ESCThrottleConstPtr &esc_state){
 	int target_value;
     ROS_INFO("CMD ESC throttle: motor %d -> %.03f",  esc_state->motor_num, esc_state->power);
 

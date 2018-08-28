@@ -2,7 +2,7 @@
 #define ROS_ESCCONTROL_H
 
 #include <ros/ros.h>
-#include <esccontrol_msgs/ESCThrottle.h>
+#include <ros_esccontrol/ESCThrottle.h>
 
 
 #define M_VERT_FRONTLEFT 3
@@ -19,7 +19,7 @@ namespace ros_esccontrol
 // Function to send a message to the ESC controller
 void setMotor(int num, float throttle, ros::Publisher & publisher)
 {
-	esccontrol_msgs::ESCThrottle throttleMessage;
+	ESCThrottle throttleMessage;
 	throttleMessage.motor_num = num;
 	throttleMessage.power = throttle;
 	publisher.publish(throttleMessage);		

@@ -1,5 +1,5 @@
 #include <ros/ros.h>
-#include <esccontrol_msgs/ESCThrottle.h>
+#include <ros_esccontrol/ESCThrottle.h>
 #include <ros_esccontrol.h>
 #include <geometry_msgs/Vector3Stamped.h>
 #include <std_msgs/Float64.h>
@@ -57,7 +57,7 @@ private:
 public:
 	TurtleMotion():
 	node("turtle_motion"),
-	throttlePublisher(node.advertise<esccontrol_msgs::ESCThrottle>("/esccontrol/esc_throttle", QUEUE_SIZE)),
+	throttlePublisher(node.advertise<ros_esccontrol::ESCThrottle>("/esccontrol/esc_throttle", QUEUE_SIZE)),
 	straightDriveSetpointPublisher(node.advertise<std_msgs::Float64>("/straight_drive_pid/setpoint", QUEUE_SIZE)),
 	straightDriveStatePublisher(node.advertise<std_msgs::Float64>("/straight_drive_pid/state", QUEUE_SIZE)),
 	imuSubscriber(node.subscribe("/navx_micro/euler", QUEUE_SIZE, &TurtleMotion::chatterNavxEuler, this))

@@ -7,7 +7,7 @@
 
 
 #include <ros/ros.h>
-#include <esccontrol_msgs/ESCThrottle.h>
+#include <ros_esccontrol/ESCThrottle.h>
 
 #include "PCA9685.h"
 
@@ -22,7 +22,7 @@ class Controller {
 
 		ros::Subscriber sub_esc;
 
-		void chatterESCThrottle (const esccontrol_msgs::ESCThrottleConstPtr &esc_state);
+		void chatterESCThrottle (const ros_esccontrol::ESCThrottleConstPtr &esc_state);
 
 };
 

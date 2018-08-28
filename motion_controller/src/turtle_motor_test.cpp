@@ -1,5 +1,5 @@
 #include <ros/ros.h>
-#include <esccontrol_msgs/ESCThrottle.h>
+#include <ros_esccontrol/ESCThrottle.h>
 #include <ros_esccontrol.h>
 #include <geometry_msgs/Vector3Stamped.h>
 #include <std_msgs/Float64.h>
@@ -15,7 +15,7 @@ int main(int argc, char** argv)
 	ros::init(argc, argv, "turtle_motion");
 	
 	ros::NodeHandle node("turtle_motor_test");
-	ros::Publisher throttlePublisher = node.advertise<esccontrol_msgs::ESCThrottle>("/esccontrol/esc_throttle", QUEUE_SIZE);
+	ros::Publisher throttlePublisher = node.advertise<ros_esccontrol::ESCThrottle>("/esccontrol/esc_throttle", QUEUE_SIZE);
 	
 	ros_esccontrol::setMotor(M_HORIZ_LEFT, 0, throttlePublisher);
 	ros_esccontrol::setMotor(M_HORIZ_RIGHT, 0, throttlePublisher);
