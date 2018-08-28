@@ -23,18 +23,30 @@
 
 #ifndef I2C_H_
 #define I2C_H_
+
 #include <inttypes.h>
-
-#define BUFFER_SIZE 0x01  //1 byte buffer
-
+#include <vector>
+#include <exception>
 
 class I2C {
 public:
-	I2C(int, int);
+
+	// construct from bus and address number
+	I2C(int bus, int address);
 	virtual ~I2C();
-	uint8_t dataBuffer[BUFFER_SIZE];
-	uint8_t read_byte(uint8_t);
-	uint8_t write_byte(uint8_t, uint8_t);
+	
+	// read a byte from an address on the device
+	uint8_t read_byte(uint8_t deviceAddress);
+	
+	// read a number of bytes from the device
+	std::vector<uint8_t> read_bytes(size_t numBytes);
+	
+	// write one byte to a specific address on the device
+	void write_byte(uint8_t deviceAddress, uint8_t byte);
+	
+	// write a number of bytes to the device
+	void write_bytes(std::vector<uint8_t> bytes);
+	
 private:
 	int _i2caddr;
 	int _i2cbus;
