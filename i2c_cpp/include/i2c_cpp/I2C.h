@@ -27,6 +27,7 @@
 #include <inttypes.h>
 #include <vector>
 #include <exception>
+#include <cstdlib>
 
 class I2C {
 public:
