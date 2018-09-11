@@ -118,8 +118,16 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
+# don't try to build linux I2C code on the host machine if it doesn't support it
+if(NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+  message(STATUS "On host machine, using mock implementation")
+  set(I2C_SOURCES src/I2C-mock.cpp)
+else()
+  set(I2C_SOURCES src/I2C.cpp)
+endif()
+
 ## Declare a C++ library
-add_library(i2c_cpp src/I2C.cpp)
+add_library(i2c_cpp ${I2C_SOURCES})
 target_include_directories(i2c_cpp PUBLIC include)
 
 ## Add cmake target dependencies of the library

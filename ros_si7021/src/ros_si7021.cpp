@@ -22,4 +22,8 @@ int main(int argc, char** argv)
 		ROS_ERROR("Status register reads as %x, (should have been 0x3a), communication error");
 		return 1;
 	}
+
+	i2c.write_bytes({0xF3});
+	uint8_t temperature = i2c.read_bytes(1)[0];
+
 }
