@@ -23,7 +23,4 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
-	i2c.write_bytes({0xF3});
-	uint8_t temperature = i2c.read_bytes(1)[0];
-
 }
