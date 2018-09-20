@@ -4,6 +4,8 @@
 
 #include <vector>
 #include <iostream>
+#include <thread>
+
 
 int main(int argc, char** argv)
 {
@@ -22,5 +24,23 @@ int main(int argc, char** argv)
 		ROS_ERROR("Status register reads as %x, (should have been 0x3a), communication error");
 		return 1;
 	}
-
+	
+	i2c.write_bytes({0xF3});
+	
+	uint16_t rawTemperature = 0;
+	
+	while(true)
+	{
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+		
+		try
+		{
+			std::vector<uint8_t> temperatureBytes = i2c.read_bytes(2);
+			rawTemperature = (temperatureBytes[0] << 8) | temperatureBytes[1];
+		}
+		catch(I2CException & ex)
+		{
+			// device not ready yet, retry
+		}
+	}	
 }
