@@ -28,6 +28,21 @@
 #include <vector>
 #include <exception>
 #include <cstdlib>
+#include <sstream>
+
+class I2CException : public std::runtime_error
+{
+public:
+	I2CException(std::string const & errorMessage):
+	std::runtime_error(errorMessage)
+	{
+	}
+	
+	I2CException(std::stringstream const & errorStream):
+	std::runtime_error(errorStream.str())
+	{
+	}
+};
 
 class I2C {
 public:
