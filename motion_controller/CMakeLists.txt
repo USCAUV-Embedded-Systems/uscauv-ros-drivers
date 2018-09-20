@@ -49,10 +49,11 @@ include_directories(
    ${catkin_INCLUDE_DIRS}
 )
 
-add_executable(motion_controller src/turtle_motion.cpp)
+add_executable(motion_controller 
+	src/turtle_motion.cpp
+	src/trap_int.cpp)
+
 target_link_libraries(motion_controller ${catkin_LIBRARIES})
 add_dependencies(motion_controller motion_controller_generate_messages_cpp ros_esccontrol_generate_messages_cpp)
 
-add_executable(motor_test src/turtle_motor_test.cpp)
-target_link_libraries(motor_test ${catkin_LIBRARIES})
 
