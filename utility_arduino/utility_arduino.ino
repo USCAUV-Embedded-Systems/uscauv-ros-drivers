@@ -1,37 +1,31 @@
 #include <Wire.h>
 
 const int PIN_READ_PRESSURE = A0;
-const int SWITCH1 = 1;
 const int SWITCH2 = 2;
 const int SWITCH3 = 3;
 const int SWITCH4 = 4;
+const int SWITCH5 = 5;
+//declare the pin
+
 int READ_SWITCH1;
 int READ_SWITCH2;
 int READ_SWITCH3;
 int READ_SWITCH4;
-
 int val = 0;
 int pressure = 0;
+//declare variables
+
 const int BUFFER_LEN = 4;
 unsigned char i2c_buffer[BUFFER_LEN] = {'\0'};
-
+//declare the buffer
 
 const int I2C_ADDRESS = 0x08; 
 //I2C_ADDRESS
-
-
 
 void setup()
 {
   // put your setup code here, to run once:
   
-
-  
-  //declare variables
-
-
-  //declare the buffer
-
   pinMode(PIN_READ_PRESSURE, INPUT);
   pinMode(SWITCH1, INPUT_PULLUP);
   pinMode(SWITCH3, INPUT_PULLUP);
@@ -68,10 +62,7 @@ void loop()
     Serial.println(READ_SWITCH3);
     Serial.println(READ_SWITCH4);
 
-    delay(100);
-
-    
-    
+    delay(100);  
 
 }
 
