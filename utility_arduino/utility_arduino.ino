@@ -62,6 +62,10 @@ void loop()
     READ_SWITCH3 = digitalRead(SWITCH3);
     READ_SWITCH4 = digitalRead(SWITCH4);
 
+    Serial.println(READ_SWITCH1)
+    Serial.println(READ_SWITCH2)
+    Serial.println(READ_SWITCH3)
+    Serial.println(READ_SWITCH4)
     
 
     
