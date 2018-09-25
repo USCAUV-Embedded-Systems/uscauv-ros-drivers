@@ -17,6 +17,7 @@ void setup()
   
   int val = 0;
   int pressure = 0;
+  
   //declare variables
 
   unsigned char i2c_buffer[BUFFER_LEN] = {'\0'};
@@ -46,7 +47,6 @@ void loop()
     //Serial.print(pressure);
     //Serial.println(" kPa");
 
-    temperature =  
     
 
 }
