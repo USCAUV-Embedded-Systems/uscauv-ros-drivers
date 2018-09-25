@@ -1,9 +1,15 @@
 #include <Wire.h>
 
 const int PIN_READ_PRESSURE = A0;
-const int PIN_READ_SWITCH1 = D1;
-const int PIN_READ_SWITCH2 = D2;
-const int PIN_READ_SWITCH3 = D3;
+const int SWITCH1 = D1;
+const int SWITCH2 = D2;
+const int SWITCH3 = D3;
+const int SWITCH4 = D4;
+int READ_SWITCH1;
+int READ_SWITCH2;
+int READ_SWITCH3;
+int READ_SWITCH4;
+
 //READ_PIN#
 
 const int I2C_ADDRESS = 0x08; 
@@ -24,9 +30,10 @@ void setup()
   //declare the buffer
 
   pinMode(PIN_READ_PRESSURE, INPUT);
-  pinMode(PIN_READ_SWITCH1, INPUT);
-  pinMode(PIN_READ_SWITCH3, INPUT);
-  pinMode(PIN_READ_SWITCH3, INPUT);
+  pinMode(SWITCH1, INPUT);
+  pinMode(SWITCH3, INPUT);
+  pinMode(SWITCH3, INPUT);
+  pinMode(SWITCH4, INPUT);
   //set read pin
   
   Wire.begin(I2C_ADDRESS); //join I2C as slave with I2C_ADDRESS
@@ -47,6 +54,14 @@ void loop()
     //Serial.print(pressure);
     //Serial.println(" kPa");
 
+    READ_SWITCH1 = digitalRead(SWITCH1);
+    READ_SWITCH2 = digitalRead(SWITCH2);
+    READ_SWITCH3 = digitalRead(SWITCH3);
+    READ_SWITCH4 = digitalRead(SWITCH4);
+
+    
+
+    
     
 
 }
