@@ -4,6 +4,7 @@ const int PIN_READ_PRESSURE = A0;
 const int PIN_READ_SWITCH1 = D1;
 const int PIN_READ_SWITCH2 = D2;
 const int PIN_READ_SWITCH3 = D3;
+const int PIN_READ_SWITCH4 = D4;
 //READ_PIN#
 
 const int I2C_ADDRESS = 0x08; 
@@ -17,7 +18,7 @@ void setup()
   
   int val = 0;
   int pressure = 0;
-  
+  int 
   //declare variables
 
   unsigned char i2c_buffer[BUFFER_LEN] = {'\0'};
