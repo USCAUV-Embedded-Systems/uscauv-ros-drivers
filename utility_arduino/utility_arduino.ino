@@ -10,7 +10,6 @@ const int I2C_ADDRESS = 0x08;
 //I2C_ADDRESS
 
 const int BUFFER_LEN = 4;
-int isbg; 
 
 void setup()
 {
