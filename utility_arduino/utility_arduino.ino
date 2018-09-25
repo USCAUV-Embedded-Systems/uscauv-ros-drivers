@@ -33,10 +33,10 @@ void setup()
   //declare the buffer
 
   pinMode(PIN_READ_PRESSURE, INPUT);
-  pinMode(SWITCH1, INPUT);
-  pinMode(SWITCH3, INPUT);
-  pinMode(SWITCH3, INPUT);
-  pinMode(SWITCH4, INPUT);
+  pinMode(SWITCH1, INPUT_PULLUP);
+  pinMode(SWITCH3, INPUT_PULLUP);
+  pinMode(SWITCH3, INPUT_PULLUP);
+  pinMode(SWITCH4, INPUT_PULLUP);
   //set read pin
   
   Wire.begin(I2C_ADDRESS); //join I2C as slave with I2C_ADDRESS
