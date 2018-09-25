@@ -1,32 +1,35 @@
 #include <Wire.h>
 
 const int PIN_READ_PRESSURE = A0;
-const int SWITCH1 = D1;
-const int SWITCH2 = D2;
-const int SWITCH3 = D3;
-const int SWITCH4 = D4;
+const int SWITCH1 = 1;
+const int SWITCH2 = 2;
+const int SWITCH3 = 3;
+const int SWITCH4 = 4;
 int READ_SWITCH1;
 int READ_SWITCH2;
 int READ_SWITCH3;
 int READ_SWITCH4;
 
-//READ_PIN#
+int val = 0;
+int pressure = 0;
+const int BUFFER_LEN = 4;
+unsigned char i2c_buffer[BUFFER_LEN] = {'\0'};
+
 
 const int I2C_ADDRESS = 0x08; 
 //I2C_ADDRESS
 
-const int BUFFER_LEN = 4;
+
 
 void setup()
 {
   // put your setup code here, to run once:
   
-  int val = 0;
-  int pressure = 0;
+
   
   //declare variables
 
-  unsigned char i2c_buffer[BUFFER_LEN] = {'\0'};
+
   //declare the buffer
 
   pinMode(PIN_READ_PRESSURE, INPUT);
@@ -45,7 +48,7 @@ void setup()
 
 void loop() 
 {  
-    val = analogRead(READ_PIN_PRESSURE);
+    val = analogRead(PIN_READ_PRESSURE);
     // read raw analogue value
     //Serial.println(val);
 
@@ -93,13 +96,13 @@ void receiveEvent(int numBytes)
   } 
   else if (id == 'b')
   {
-    for(int i = 0; i < BUFFER_LEN; i++)
+    /*for(int i = 0; i < BUFFER_LEN; i++)
     {
       i2c_buffer[3 - i] = (temperature >> (i * 8));
     }
     // fill the buffer with temperature value
 
     Wire.write(i2c_buffer, BUFFER_LEN);
-    // respond with temperature of BUFFER_LEN bytes (int) and '\0' as sentinel
+    // respond with temperature of BUFFER_LEN bytes (int) and '\0' as sentinel*/
   }
 }
