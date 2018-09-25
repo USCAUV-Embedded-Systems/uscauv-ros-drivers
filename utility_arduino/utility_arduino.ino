@@ -48,19 +48,18 @@ void loop()
 
     pressure = map(val, 95, 1023, 0, 103.42);
     // project raw analogue value into kPa
-    Serial.print(pressure);
+    //Serial.print(pressure);
     //Serial.println(" kPa");
 
     READ_SWITCH1 = digitalRead(SWITCH1);
     READ_SWITCH2 = digitalRead(SWITCH2);
     READ_SWITCH3 = digitalRead(SWITCH3);
     READ_SWITCH4 = digitalRead(SWITCH4);
-    
- 
-    Serial.println(READ_SWITCH1);
-    Serial.println(READ_SWITCH2);
-    Serial.println(READ_SWITCH3);
-    Serial.println(READ_SWITCH4);
+    // read switch switch status
+    //Serial.println(READ_SWITCH1);
+    //Serial.println(READ_SWITCH2);
+    //Serial.println(READ_SWITCH3);
+    //Serial.println(READ_SWITCH4);
 
     delay(100);  
 
