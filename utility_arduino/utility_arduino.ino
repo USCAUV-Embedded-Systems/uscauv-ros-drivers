@@ -3,26 +3,23 @@
 const int PIN_READ_PRESSURE = A0;
 const int PIN_READ_MOTORBAT = A1;
 const int PIN_READ_LOGICBAT = A2;
-const int SWITCH2 = D2;
-const int SWITCH3 = D3;
-const int SWITCH4 = D4;
-const int SWITCH5 = D5;
+const int SWITCH1 = 2;
+const int SWITCH2 = 3;
+const int SWITCH3 = 4;
+const int SWITCH4 = 5;
 //declare the pin
 
+int READ_SWITCH1;
 int READ_SWITCH2;
 int READ_SWITCH3;
 int READ_SWITCH4;
-int READ_SWITCH5;
 int val_pres = 0;
 int val_motor_batt = 0;
 int val_logic_batt = 0;
-double pressure = 0;
-double motor_battery = 0;
-double logic_battery = 0;
 
 //declare variables
 
-const int BUFFER_LEN = 8;
+const int BUFFER_LEN = 4;
 unsigned char i2c_buffer[BUFFER_LEN] = {'\0'};
 unsigned char button_state;
 //declare the buffer
@@ -38,7 +35,7 @@ void setup()
   pinMode(PIN_READ_MOTORBAT, INPUT);
   pinMode(PIN_READ_LOGICBAT, INPUT);
   pinMode(SWITCH1, INPUT_PULLUP);
-  pinMode(SWITCH3, INPUT_PULLUP);
+  pinMode(SWITCH2, INPUT_PULLUP);
   pinMode(SWITCH3, INPUT_PULLUP);
   pinMode(SWITCH4, INPUT_PULLUP);
   //set read pin
@@ -56,10 +53,9 @@ void loop()
     // read raw analogue value
     //Serial.println(val_pres);
 
-    pressure = map(val_pres, 95, 1023, 0, 103.42);
+    // pressure = map(val_pres, 95, 1023, 0, 103.42);
     // project raw analogue value into kPa
-    //Serial.print(pressure);
-    //Serial.println(" kPa");
+
 
     val_motor_batt = analogRead(PIN_READ_MOTORBAT);
 
@@ -69,10 +65,11 @@ void loop()
 
     //logic_battery = map(val_logic_batt, );        //To be finished
 
+    READ_SWITCH1 = digitalRead(SWITCH1);
     READ_SWITCH2 = digitalRead(SWITCH2);
     READ_SWITCH3 = digitalRead(SWITCH3);
     READ_SWITCH4 = digitalRead(SWITCH4);
-    READ_SWITCH5 = digitalRead(SWITCH5);
+    
     // read switch switch status
     //Serial.println(READ_SWITCH2);
     //Serial.println(READ_SWITCH3);
@@ -83,12 +80,17 @@ void loop()
 
 }
 
+
+
 void requestEvent()
 {
   // executes when mentioned by master
-
   Wire.write(0x06);
 }
+
+
+
+
 
 void receiveEvent(int numBytes)
 {
@@ -101,7 +103,7 @@ void receiveEvent(int numBytes)
   {
     for(int i = 0; i < BUFFER_LEN; i++)
     {
-      i2c_buffer[BUFFER_LEN - 1 - i] = (pressure >> (i * 4));
+      i2c_buffer[BUFFER_LEN - 1 - i] = (val_pres >> (i * 4));
     }
     // fill the buffer with pressure value
 
@@ -110,7 +112,7 @@ void receiveEvent(int numBytes)
   } 
   else if (id == 'b')
   {
-    button_state = READ_SWITCH2 | (READ_SWITCH3 << 1) | (READ_SWITCH4 << 2) | (READ_SWITCH5 << 3);
+    button_state = READ_SWITCH1 | (READ_SWITCH2 << 1) | (READ_SWITCH3 << 2) | (READ_SWITCH4 << 3);
     // assemble the button state
 
     Wire.write(button_state);
@@ -120,7 +122,7 @@ void receiveEvent(int numBytes)
   {
     for(int i = 0; i < BUFFER_LEN; i++)
     {
-      i2c_buffer[BUFFER_LEN - 1 - i] = (motor_battery >> (i * 4));
+      i2c_buffer[BUFFER_LEN - 1 - i] = (val_motor_batt >> (i * 4));
     }
     // fill the buffer with motor battery value
 
@@ -131,7 +133,7 @@ void receiveEvent(int numBytes)
   {
     for(int i = 0; i < BUFFER_LEN; i++)
     {
-      i2c_buffer[BUFFER_LEN - 1 - i] = (logic_battery >> (i * 4));
+      i2c_buffer[BUFFER_LEN - 1 - i] = (val_logic_batt >> (i * 4));
     }
     // fill the buffer with logic battery value
 
