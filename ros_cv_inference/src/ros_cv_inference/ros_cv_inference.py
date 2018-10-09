@@ -141,72 +141,71 @@ def inference_and_talker():
                 frame_count = 0
 
                 #Here we can do both while rospy is not shutdown and while VC is opened
-                while not rospy.is_shutdown():
-                    while (vc.isOpened()):
-                        # Capture frame-by-frame
-                        ret, frame = vc.read()
-                        if not ret:
-                            # Release the Video Device if ret is false
-                            vc.release()
-                            # Message to be displayed after releasing the device
-                            print("Released Video Resource")
-                            break
+                while not rospy.is_shutdown() and vc.isOpened():
+                    # Capture frame-by-frame
+                    ret, frame = vc.read()
+                    if not ret:
+                        # Release the Video Device if ret is false
+                        vc.release()
+                        # Message to be displayed after releasing the device
+                        print("Released Video Resource")
+                        break
 
-                        # frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                    # frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-                        # the array based representation of the image will be used later in order to prepare the
-                        # result image with boxes and labels on it.
-                        image_np = load_frame_into_numpy_array(frame)
+                    # the array based representation of the image will be used later in order to prepare the
+                    # result image with boxes and labels on it.
+                    image_np = load_frame_into_numpy_array(frame)
 
-                        # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
-                        image_np_expanded = np.expand_dims(image_np, axis=0)
+                    # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
+                    image_np_expanded = np.expand_dims(image_np, axis=0)
 
-                        frame_start = timeit.default_timer()
+                    frame_start = timeit.default_timer()
 
-                        # Actual detection.
-                        (boxes, scores, classes, num) = sess.run(
-                            [detection_boxes, detection_scores, detection_classes, num_detections],
-                            feed_dict={image_tensor: image_np_expanded})
+                    # Actual detection.
+                    (boxes, scores, classes, num) = sess.run(
+                        [detection_boxes, detection_scores, detection_classes, num_detections],
+                        feed_dict={image_tensor: image_np_expanded})
 
-                        total_detection_time += timeit.default_timer() - frame_start
-                        frame_count += 1
+                    total_detection_time += timeit.default_timer() - frame_start
+                    frame_count += 1
 
-                        # Visualization of the results of a detection.
-                        vis_util.visualize_boxes_and_labels_on_image_array(
-                            image_np,
-                            np.squeeze(boxes),
-                            np.squeeze(classes).astype(np.int32),
-                            np.squeeze(scores),
-                            category_index,
-                            use_normalized_coordinates=True,
-                            line_thickness=4)
+                    # Visualization of the results of a detection.
+                    vis_util.visualize_boxes_and_labels_on_image_array(
+                        image_np,
+                        np.squeeze(boxes),
+                        np.squeeze(classes).astype(np.int32),
+                        np.squeeze(scores),
+                        category_index,
+                        use_normalized_coordinates=True,
+                        line_thickness=4)
 
-                        width = vc.get(cv2.cv.CV_CAP_PROP_FRAME_WIDTH);
-                        height = vc.get(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT);
+                    width = vc.get(cv2.cv.CV_CAP_PROP_FRAME_WIDTH);
+                    height = vc.get(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT);
 
-                        objects = []
-                        for index, value in enumerate(classes[0]):
-                          object_dict = {}
-                          if scores[0, index] > 0.1:
-                            ymin = int((boxes[0][0][0]*height))
-                            xmin = int((boxes[0][0][1]*width))
-                            ymax = int((boxes[0][0][2]*height))
-                            xmax = int((boxes[0][0][3]*width))
-                            object_dict[xmin,ymin,xmax,ymax,(category_index.get(value)).get('name').encode('utf8')] = \
-                                                scores[0, index]
-                            objects.append(object_dict)
-                            pub.publish(str(objects));
+                    objects = []
+                    for index, value in enumerate(classes[0]):
+                      object_dict = {}
+                      if scores[0, index] > 0.1:
+                        ymin = int((boxes[0][0][0]*height))
+                        xmin = int((boxes[0][0][1]*width))
+                        ymax = int((boxes[0][0][2]*height))
+                        xmax = int((boxes[0][0][3]*width))
+                        object_dict[xmin,ymin,xmax,ymax,(category_index.get(value)).get('name').encode('utf8')] = \
+                                            scores[0, index]
+                        objects.append(object_dict)
+                        pub.publish(str(objects));
 
 
-                        # out.write(cv2.cvtColor(image_np, cv2.COLOR_RGB2BGR))
+                    # out.write(cv2.cvtColor(image_np, cv2.COLOR_RGB2BGR))
 
-                        cv2.imshow('Camera Input', image_np)
-                        if cv2.waitKey(1) & 0xFF == ord('q'):
-                            break
+                    cv2.imshow('Camera Input', image_np)
+                    if cv2.waitKey(1) & 0xFF == ord('q'):
+                        break
 
-                        rate.sleep()
-                    print('Total Time: ', timeit.default_timer() - start_time)
-                    print('Average Time :', total_detection_time / frame_count if frame_count > 0 else 0.0)
+                    rate.sleep()
+                print('Total Time: ', timeit.default_timer() - start_time)
+                print('Average Time :', total_detection_time / frame_count if frame_count > 0 else 0.0)
 
             except KeyboardInterrupt:
                 # Release the Video Device
