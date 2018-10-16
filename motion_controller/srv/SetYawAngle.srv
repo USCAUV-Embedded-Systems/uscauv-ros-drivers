@@ -1,0 +1,4 @@
+# Set the yaw angle of the sub. 0 yaw is straight ahead compared to where the sub was
+# pointing when the IMU was last reset
+float32 yaw
+---

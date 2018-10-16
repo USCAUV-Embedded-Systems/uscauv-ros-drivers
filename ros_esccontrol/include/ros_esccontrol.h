@@ -4,6 +4,7 @@
 #include <ros/ros.h>
 #include <ros_esccontrol/ESCThrottle.h>
 
+#define NUM_MOTORS 6
 
 #define M_VERT_FRONTLEFT 3
 #define M_VERT_BACKLEFT 2

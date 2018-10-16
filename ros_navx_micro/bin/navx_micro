@@ -20,7 +20,7 @@ from sensor_msgs.msg import Imu
 
 # --- edit these lines to change settings ---
 port="/dev/i2c-1"
-refresh_rate=50 # Hz, from 4 to 100
+refresh_rate=100 # Hz, from 4 to 100
 
 # Verify that IMU is connected by reading model number register
 # -------------------------------------------------

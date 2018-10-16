@@ -13,7 +13,8 @@ find_package(catkin REQUIRED COMPONENTS
   ros_esccontrol
 )
 
-add_service_files(FILES GoStraight.srv)
+add_service_files(FILES SetDepth.srv SetForwardsPower.srv SetRollPitchAngles.srv SetYawAngle.srv InitMotors.srv)
+
 generate_messages(DEPENDENCIES std_msgs)
 
 ## System dependencies are found with CMake's conventions

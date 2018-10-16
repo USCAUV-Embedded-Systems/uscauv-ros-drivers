@@ -1,0 +1,4 @@
+# Forwards power, as a percentage from -1.0-1.0
+# Negative values will make the sub drive backwards.
+float32 forwardsPower
+---
