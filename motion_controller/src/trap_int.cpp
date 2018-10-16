@@ -6,6 +6,6 @@ void TrapezoidalIntegrator::add(double dt, double value) {
 	prevPoint=value;
 }
 
-float TrapezoidalIntegrator::get() const {
+double TrapezoidalIntegrator::get() const {
 	return total;
 }
