@@ -38,3 +38,4 @@ catkin_python_setup()
 
 catkin_install_python(PROGRAMS bin/ros_cv_inference DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 catkin_install_python(PROGRAMS bin/test_cv_subscriber DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+catkin_install_python(PROGRAMS bin/ros_cv_laptop DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})

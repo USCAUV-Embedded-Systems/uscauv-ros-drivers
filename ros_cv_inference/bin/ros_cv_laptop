@@ -1,0 +1,6 @@
+#! /usr/bin/env python
+
+import ros_cv_inference.ros_cv_laptop
+
+if __name__ == '__main__':
+    ros_cv_inference.ros_cv_laptop.inference_and_talker()
