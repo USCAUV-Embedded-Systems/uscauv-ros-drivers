@@ -19,7 +19,7 @@ int val_logic_batt = 0;
 
 //declare variables
 
-const int BUFFER_LEN = 8;
+const int BUFFER_LEN = 2;
 unsigned char i2c_buffer[BUFFER_LEN] = {'\0'};
 unsigned char button_state;
 //declare the buffer
@@ -85,63 +85,57 @@ void loop()
 void requestEvent()
 {
   // executes when mentioned by master
-  Wire.write(0x06);
+  
+    Wire.write(i2c_buffer, BUFFER_LEN);
+    // respond with pressure of BUFFER_LEN bytes (int)
 }
-
-
 
 
 
 void receiveEvent(int numBytes)
 {
   // executes when receives message sent by master
-  // receive the bite
-
-  int id = Wire.read();
-  
-  Wire.write(i2c_buffer, BUFFER_LEN);
-  
+ 
+  char id = Wire.read();
   /*
-  if(id == 97)
+  Serial.println("Wire code:");
+  Serial.println((int16_t)id);
+  // receive the byte
+  */
+  
+  if(id == 'a')
   {
+    Serial.println(val_pres);
+    memcpy(i2c_buffer, &val_pres, 2);
+
+    /*
+    // print out the written data [DEBUG]
     for(int i = 0; i < BUFFER_LEN; i++)
     {
-      i2c_buffer[BUFFER_LEN - 1 - i] = (val_pres >> (i * 8));
+      Serial.println((uint16_t)i2c_buffer[i]);
     }
-    // fill the buffer with pressure value
-
-    Wire.write(i2c_buffer, BUFFER_LEN);
-    // respond with pressure of BUFFER_LEN bytes (double)
+    */
   } 
   else if (id == 'b')
   {
     button_state = READ_SWITCH1 | (READ_SWITCH2 << 1) | (READ_SWITCH3 << 2) | (READ_SWITCH4 << 3);
     // assemble the button state
 
-    Wire.write(button_state);
+    Serial.println(button_state);
+    memcpy(i2c_buffer, &button_state, 1);
     // respond with button state
+    i2c_buffer[1] = 0;
   }
   else if (id == 'c')
   {
-    for(int i = 0; i < BUFFER_LEN; i++)
-    {
-      i2c_buffer[BUFFER_LEN - 1 - i] = (val_motor_batt >> (i * 8));
-    }
+    Serial.println(val_motor_batt);
+    memcpy(i2c_buffer, &val_motor_batt, 2);
     // fill the buffer with motor battery value
-
-    Wire.write(i2c_buffer, BUFFER_LEN);
-    // respond with motor battery voltage of BUFFER_LEN bytes (double)  
   }
   else if (id == 'd')
   {
-    for(int i = 0; i < BUFFER_LEN; i++)
-    {
-      i2c_buffer[BUFFER_LEN - 1 - i] = (val_logic_batt >> (i * 8));
-    }
-    // fill the buffer with logic battery value
-
-    Wire.write(i2c_buffer, BUFFER_LEN);
-    // respond with logic battery voltage of BUFFER_LEN bytes (double) 
-    
-  }*/
+    Serial.println(val_logic_batt);
+    memcpy(i2c_buffer, &val_logic_batt, 2);
+    // fill the buffer with logic battery value 
+  }
 }
