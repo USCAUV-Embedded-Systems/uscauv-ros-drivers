@@ -48,6 +48,7 @@ include_directories(
 )
 
 add_executable(esccontroller src/controller_sub.cpp src/lib/PCA9685/PCA9685.cpp)
+add_dependencies(esccontroller ros_esccontrol_generate_messages_cpp)
 target_link_libraries(esccontroller ${catkin_LIBRARIES})
 
 

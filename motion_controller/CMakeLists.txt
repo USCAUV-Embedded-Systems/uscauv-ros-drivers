@@ -55,4 +55,5 @@ add_dependencies(motion_controller motion_controller_generate_messages_cpp ros_e
 
 add_executable(motor_test src/turtle_motor_test.cpp)
 target_link_libraries(motor_test ${catkin_LIBRARIES})
+add_dependencies(motor_test motion_controller_generate_messages_cpp ros_esccontrol_generate_messages_cpp)
 
