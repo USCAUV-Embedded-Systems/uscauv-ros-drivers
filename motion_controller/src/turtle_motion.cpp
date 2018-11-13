@@ -2,17 +2,25 @@
 #include "angle_pid.h"
 #include "turtle_motion.h"
 
-#define QUEUE_SIZE 10
 
 namespace motion_controller
 {
 
 		
-void TurtleMotion::chatterNavxEuler(const geometry_msgs::Vector3Stamped &vector)
+void TurtleMotion::chatterIMUEuler(const geometry_msgs::Vector3Stamped &vector)
 {
-	sensorRoll = vector.vector.x;
-	sensorPitch = vector.vector.y;
-	sensorYaw = 180-vector.vector.z;
+	sensorRoll = static_cast<float>(vector.vector.x);
+	sensorPitch = static_cast<float>(vector.vector.y);
+	sensorYaw = static_cast<float>(180 - vector.vector.z);
+
+	if(enabled)
+	{
+		rollPID.update(sensorRoll);
+		pitchPID.update(sensorPitch);
+		yawPID.update(sensorYaw);
+
+		updateOutputs();
+	}
 }
 
 
@@ -166,11 +174,6 @@ bool turn(float degrees)
 	
 
 	
-}
-
-// update yaw PID output based on sensor data
-void TurtleMotion::updateYawPID()
-{
 }
 
 // update outputs based on current PID values

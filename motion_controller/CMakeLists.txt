@@ -13,7 +13,14 @@ find_package(catkin REQUIRED COMPONENTS
   ros_esccontrol
 )
 
-add_service_files(FILES SetDepth.srv SetForwardsPower.srv SetRollPitchAngles.srv SetYawAngle.srv InitMotors.srv)
+add_service_files(FILES
+		SetDepth.srv
+		SetForwardsPower.srv
+		SetRollPitchAngles.srv
+		SetYawAngle.srv
+		InitMotors.srv
+		SetEnabled.srv
+		Zero.zrv)
 
 generate_messages(DEPENDENCIES std_msgs)
 
