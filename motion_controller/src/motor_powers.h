@@ -6,6 +6,8 @@
 #include <sstream>
 #include <iomanip>
 
+#include <ros_esccontrol.h>
+
 // simple struct for representing the set of 6 motor powers
 // for the motors on the robot.
 class MotorPowers
@@ -16,7 +18,7 @@ private:
 public:
 	
 	// empty constructor
-	MotorPowers(){}
+	MotorPowers() = default;
 	
 	// default assignment and copy constructor
 	MotorPowers & operator=(const MotorPowers & other) = default;
@@ -31,7 +33,7 @@ public:
 		
 		motorPowers[num - 1] = power;
 	}
-	float getPower(int num)
+	float getPower(int num) const
 	{
 		assert(num > 0);
 		assert(num <= NUM_MOTORS);

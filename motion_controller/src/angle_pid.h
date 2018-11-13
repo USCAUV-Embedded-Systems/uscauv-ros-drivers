@@ -5,6 +5,10 @@
 #include <thread>
 #include <cmath>
 #include <iostream>
+#include <sstream>
+
+#include <ros/ros.h>
+
 #include "trap_int.h"
 
 // Class that performs angular PID on a system.

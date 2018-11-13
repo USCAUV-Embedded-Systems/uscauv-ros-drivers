@@ -23,7 +23,7 @@ void TurtleMotion::chatterIMUEuler(const geometry_msgs::Vector3Stamped &vector)
 	}
 }
 
-
+/*
 
 
 bool goStraight(GoStraightRequest & request, GoStraightResponse & response, float diveTimeSec)
@@ -176,16 +176,22 @@ bool turn(float degrees)
 	
 }
 
+ */
+
 // update outputs based on current PID values
 void TurtleMotion::updateOutputs()
 {
+	MotorPowers sumMotorPowers;
 
-	// set motor outputs by adding each PID loop's outputs together.
-	MotorPowers sumMotorPowers = rollPIDPowers + pitchPIDPowers + yawPIDPowers + depthPIDPowers + forwardsMotionPowers;
-	
+	if(enabled)
+	{
+		// set motor outputs by adding each PID loop's outputs together.
+		MotorPowers sumMotorPowers = rollPIDPowers + pitchPIDPowers + yawPIDPowers + depthPIDPowers + forwardsMotionPowers;
+	}
+
 	for(int motorNum = 1; motorNum <= NUM_MOTORS; ++motorNum)
 	{
-		ros_esccontrol::setMotor(motorNum, sumMotorPowers.get, throttlePublisher);
+		ros_esccontrol::setMotor(motorNum, sumMotorPowers.getPower(motorNum), throttlePublisher);
 	}
 }
 

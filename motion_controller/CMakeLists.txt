@@ -20,7 +20,7 @@ add_service_files(FILES
 		SetYawAngle.srv
 		InitMotors.srv
 		SetEnabled.srv
-		Zero.zrv)
+		Zero.srv)
 
 generate_messages(DEPENDENCIES std_msgs)
 

@@ -18,83 +18,98 @@
 
 // generated header files for this service
 #include <motion_controller/SetDepth.h>
+#include <motion_controller/SetForwardsPower.h>
+#include <motion_controller/SetRollPitchAngles.h>
+#include <motion_controller/SetYawAngle.h>
 
 #define QUEUE_SIZE 10
 
 
-namespace motion_controller
-{
+namespace motion_controller {
 
-class TurtleMotion
-{
-public:
-	ros::NodeHandle node;
-	
-private:
+    class TurtleMotion {
+    public:
+        ros::NodeHandle node;
 
-	ros::Publisher throttlePublisher;
+        ros::Publisher throttlePublisher;
 
-	ros::Subscriber imuSubscriber;
+    private:
 
-	// setpoints
-	float desiredRoll;
-	float desiredPitch;
-	float desiredYaw;
-	float desiredDepth;
-	
-	// last data recieved from sensors
-	float sensorRoll;
-	float sensorPitch;
-	float sensorYaw;
-	float sensorDepth;
-	
-	// outputs from the various control loops
-	MotorPowers rollPIDPowers;
-	MotorPowers pitchPIDPowers;
-	MotorPowers yawPIDPowers;
-	MotorPowers depthPIDPowers;
-	MotorPowers forwardsMotionPowers;
-	
-	AnglePID<float> rollPID;
-	AnglePID<float> pitchPID;
-	AnglePID<float> yawPID;
+        ros::Subscriber imuSubscriber;
 
-	// if false, all outputs are disabled, and no data gets fed into PID controllers
-	bool enabled;
-		
-	void chatterIMUEuler(const geometry_msgs::Vector3Stamped &vector);
-	
-public:
+        // setpoints
+        float desiredRoll;
+        float desiredPitch;
+        float desiredYaw;
+        float desiredDepth;
 
-	TurtleMotion():
-	node("turtle_motion"),
-	throttlePublisher(node.advertise<ros_esccontrol::ESCThrottle>("/esccontrol/esc_throttle", QUEUE_SIZE)),
-	imuSubscriber(node.subscribe("/ros_ngimu/euler", QUEUE_SIZE, &TurtleMotion::chatterIMUEuler, this)),
-	desiredRoll(0),
-	desiredPitch(0),
-	desiredYaw(0),
-	desiredDepth(0),
-	sensorRoll(0),
-	sensorYaw(0),
-	sensorPitch(0),
-	rollPIDPowers(),
-	pitchPIDPowers(),
-	yawPIDPowers(),
-	depthPIDPowers(),
-	forwardsMotionPowers(),
-	rollPID(false, 0, 0, 0, 0, 0),
-	pitchPID(false, 0, 0, 0, 0, 0),
-	yawPID(true, .06, 0.0, .001, 0, 2),
-	enabled(false)
-	{
+        // last data recieved from sensors
+        float sensorRoll;
+        float sensorPitch;
+        float sensorYaw;
+        float sensorDepth;
 
-	}
+        // outputs from the various control loops
+        MotorPowers rollPIDPowers;
+        MotorPowers pitchPIDPowers;
+        MotorPowers yawPIDPowers;
+        MotorPowers depthPIDPowers;
+        MotorPowers forwardsMotionPowers;
+
+        AnglePID<float> rollPID;
+        AnglePID<float> pitchPID;
+        AnglePID<float> yawPID;
+
+        // if false, all outputs are disabled, and no data gets fed into PID controllers
+        bool enabled;
+
+        void chatterIMUEuler(const geometry_msgs::Vector3Stamped &vector);
 
 
-	// update outputs based on current PID values
-	void updateOutputs();
-	
-};
+        // setpoint services
+        void setDepth(motion_controller::SetDepthRequest & request, motion_controller::SetDepthResponse & response)
+        {
+            desiredDepth = request.depth;
+            // TODO: depth PID
+        }
 
+        void setForwardsPower(motion_controller::SetForwardsPowerRequest & request, motion_controller::SetForwardsPowerResponse & response)
+        {
+            forwardsMotionPowers.setPower(M_HORIZ_LEFT, request.forwardsPower);
+            forwardsMotionPowers.setPower(M_HORIZ_RIGHT, request.forwardsPower);
+        }
+
+    public:
+
+        TurtleMotion() :
+                node("turtle_motion"),
+                throttlePublisher(node.advertise<ros_esccontrol::ESCThrottle>("/esccontrol/esc_throttle", QUEUE_SIZE)),
+                imuSubscriber(node.subscribe("/ros_ngimu/euler", QUEUE_SIZE, &TurtleMotion::chatterIMUEuler, this)),
+                desiredRoll(0),
+                desiredPitch(0),
+                desiredYaw(0),
+                desiredDepth(0),
+                sensorRoll(0),
+                sensorYaw(0),
+                sensorPitch(0),
+                rollPIDPowers(),
+                pitchPIDPowers(),
+                yawPIDPowers(),
+                depthPIDPowers(),
+                forwardsMotionPowers(),
+                rollPID(false, 0, 0, 0, 0, 0),
+                pitchPID(false, 0, 0, 0, 0, 0),
+                yawPID(true, .06, 0.0, .001, 0, 2),
+                enabled(false) {
+
+        }
+
+
+        // update outputs based on current PID values
+        void updateOutputs();
+
+    };
+
+}
 
 #endif
