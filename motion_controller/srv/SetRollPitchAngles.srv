@@ -1,4 +1,4 @@
-# Roll and pitch angles in degrees.  0 degrees on both sets the robot straight up.
+# Roll and pitch angles in degrees.  0 degrees on both sets the robot straight up.  Positive angles rotate counterclockwise
 float32 roll
 float32 pitch
 ---

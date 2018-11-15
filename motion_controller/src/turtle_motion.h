@@ -21,6 +21,9 @@
 #include <motion_controller/SetForwardsPower.h>
 #include <motion_controller/SetRollPitchAngles.h>
 #include <motion_controller/SetYawAngle.h>
+#include <motion_controller/Zero.h>
+#include <motion_controller/InitMotors.h>
+#include <motion_controller/SetEnabled.h>
 
 #define QUEUE_SIZE 10
 
@@ -63,21 +66,24 @@ namespace motion_controller {
         // if false, all outputs are disabled, and no data gets fed into PID controllers
         bool enabled;
 
-        void chatterIMUEuler(const geometry_msgs::Vector3Stamped &vector);
+		void updateAngularPIDLoops();
 
+		void chatterIMUEuler(const geometry_msgs::Vector3Stamped &vector);
 
         // setpoint services
-        void setDepth(motion_controller::SetDepthRequest & request, motion_controller::SetDepthResponse & response)
-        {
-            desiredDepth = request.depth;
-            // TODO: depth PID
-        }
+        bool setDepth(motion_controller::SetDepthRequest & request, motion_controller::SetDepthResponse & response);
 
-        void setForwardsPower(motion_controller::SetForwardsPowerRequest & request, motion_controller::SetForwardsPowerResponse & response)
-        {
-            forwardsMotionPowers.setPower(M_HORIZ_LEFT, request.forwardsPower);
-            forwardsMotionPowers.setPower(M_HORIZ_RIGHT, request.forwardsPower);
-        }
+        bool setForwardsPower(motion_controller::SetForwardsPowerRequest & request, motion_controller::SetForwardsPowerResponse & response);
+
+		bool setRollPitchAngles(motion_controller::SetRollPitchAnglesRequest & request, motion_controller::SetRollPitchAnglesResponse & response);
+
+		bool setYawAngle(motion_controller::SetYawAngleRequest & request, motion_controller::SetYawAngleResponse & response);
+
+		bool zero(motion_controller::ZeroRequest & request, motion_controller::ZeroResponse & response);
+
+		bool setEnabled(motion_controller::SetEnabledRequest & request, motion_controller::SetEnabledResponse & response);
+
+		bool initMotors(motion_controller::InitMotorsRequest &request, motion_controller::InitMotorsResponse &response);
 
     public:
 
@@ -92,6 +98,7 @@ namespace motion_controller {
                 sensorRoll(0),
                 sensorYaw(0),
                 sensorPitch(0),
+				sensorDepth(0),
                 rollPIDPowers(),
                 pitchPIDPowers(),
                 yawPIDPowers(),
@@ -100,8 +107,15 @@ namespace motion_controller {
                 rollPID(false, 0, 0, 0, 0, 0),
                 pitchPID(false, 0, 0, 0, 0, 0),
                 yawPID(true, .06, 0.0, .001, 0, 2),
-                enabled(false) {
-
+                enabled(false)
+		{
+			node.advertiseService("turtle_motion/SetRollPitchAngles", &TurtleMotion::setRollPitchAngles, this);
+			node.advertiseService("turtle_motion/SetDepth", &TurtleMotion::setDepth, this);
+			node.advertiseService("turtle_motion/SetEnabled", &TurtleMotion::setEnabled, this);
+			node.advertiseService("turtle_motion/SetForwardsPower", &TurtleMotion::setForwardsPower, this);
+			node.advertiseService("turtle_motion/SetYawAngle", &TurtleMotion::setYawAngle, this);
+			node.advertiseService("turtle_motion/Zero", &TurtleMotion::zero, this);
+			node.advertiseService("turtle_motion/InitMotors", &TurtleMotion::initMotors, this);
         }
 
 
@@ -111,5 +125,6 @@ namespace motion_controller {
     };
 
 }
+
 
 #endif
