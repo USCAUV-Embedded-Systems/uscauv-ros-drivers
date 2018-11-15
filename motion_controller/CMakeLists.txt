@@ -13,7 +13,15 @@ find_package(catkin REQUIRED COMPONENTS
   ros_esccontrol
 )
 
-add_service_files(FILES GoStraight.srv)
+add_service_files(FILES
+		SetDepth.srv
+		SetForwardsPower.srv
+		SetRollPitchAngles.srv
+		SetYawAngle.srv
+		InitMotors.srv
+		SetEnabled.srv
+		Zero.srv)
+
 generate_messages(DEPENDENCIES std_msgs)
 
 ## System dependencies are found with CMake's conventions
@@ -49,11 +57,13 @@ include_directories(
    ${catkin_INCLUDE_DIRS}
 )
 
-add_executable(motion_controller src/turtle_motion.cpp)
+add_executable(motion_controller 
+	src/turtle_motion.cpp
+	src/trap_int.cpp)
+
 target_link_libraries(motion_controller ${catkin_LIBRARIES})
 add_dependencies(motion_controller motion_controller_generate_messages_cpp ros_esccontrol_generate_messages_cpp)
 
 add_executable(motor_test src/turtle_motor_test.cpp)
 target_link_libraries(motor_test ${catkin_LIBRARIES})
 add_dependencies(motor_test motion_controller_generate_messages_cpp ros_esccontrol_generate_messages_cpp)
-

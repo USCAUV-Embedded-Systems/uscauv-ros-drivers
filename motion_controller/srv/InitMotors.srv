@@ -1,0 +1,6 @@
+# Sets all motors to zero power for 500 milliseconds, which initializes the motor
+# controllers.
+# NOTE: the reason we have to do this is that the motor controllers are made for
+# remote control planes, and want the plane's controller to zero the joystick 
+# before flight.
+---

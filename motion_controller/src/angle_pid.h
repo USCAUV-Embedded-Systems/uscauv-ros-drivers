@@ -5,13 +5,18 @@
 #include <thread>
 #include <cmath>
 #include <iostream>
+#include <sstream>
+
+#include <ros/ros.h>
+
+#include "trap_int.h"
 
 // Class that performs angular PID on a system.
 // Is templated so it can be used with either floats or doubles.
 // NOTE: Angles input into the class don't have to be normalized
 
-template<typename FPType> 
-class AnglePID
+template <typename FPType> 
+class AnglePID: public TrapezoidalIntegrator
 {
 	// controls whether value data will be printed, and whether PID constants
 	// will be read from an environment variable
@@ -30,7 +35,6 @@ class AnglePID
 	FPType _target;
 		
 	// data from previous iterations
-	FPType _integral;
 	FPType _prevError;
 	
 	// time of previous update
@@ -60,7 +64,6 @@ public:
 	_numCyclesUnderThreshold(0),
 	_completeThreshold(completeThreshold),
 	_target(normalizeAngle(target)),
-	_integral(0),
 	_prevError(0),
 	_prevTimestamp(std::chrono::steady_clock::now())
 	{
@@ -127,11 +130,11 @@ public:
 		}
 		
 		// update integral
-		_integral += error * deltaTime;
+		add(deltaTime, error);
 		
 		// calculate PID values
 		FPType P = _kP * error;
-		FPType I = _kI * _integral;
+		FPType I = _kI * get();
 		FPType D = -1 * _kD * (error-_prevError) / deltaTime;
 		
 		FPType correction = P + I + D;
