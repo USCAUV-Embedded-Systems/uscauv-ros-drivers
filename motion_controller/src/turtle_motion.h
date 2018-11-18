@@ -25,7 +25,7 @@
 #include <motion_controller/InitMotors.h>
 #include <motion_controller/SetEnabled.h>
 
-#define QUEUE_SIZE 10
+#define QUEUE_SIZE 100
 
 
 namespace motion_controller {
@@ -63,12 +63,20 @@ namespace motion_controller {
         AnglePID<float> pitchPID;
         AnglePID<float> yawPID;
 
+        ros::ServiceServer srv_setRollPitchAngles;
+        ros::ServiceServer srv_setDepth;
+        ros::ServiceServer srv_setEnabled;
+        ros::ServiceServer srv_setForwardsPower;
+        ros::ServiceServer srv_setYawAngle;
+        ros::ServiceServer srv_zero;
+        ros::ServiceServer srv_initMotors;
+
         // if false, all outputs are disabled, and no data gets fed into PID controllers
         bool enabled;
 
 		void updateAngularPIDLoops();
 
-		void chatterIMUEuler(const geometry_msgs::Vector3Stamped &vector);
+		void chatterIMUEuler(const geometry_msgs::Vector3Stamped::ConstPtr &vector);
 
         // setpoint services
         bool setDepth(motion_controller::SetDepthRequest & request, motion_controller::SetDepthResponse & response);
@@ -88,9 +96,9 @@ namespace motion_controller {
     public:
 
         TurtleMotion() :
-                node("turtle_motion"),
+                node("motion_controller"),
                 throttlePublisher(node.advertise<ros_esccontrol::ESCThrottle>("/esccontrol/esc_throttle", QUEUE_SIZE)),
-                imuSubscriber(node.subscribe("/ros_ngimu/euler", QUEUE_SIZE, &TurtleMotion::chatterIMUEuler, this)),
+                imuSubscriber(node.subscribe("/ngimu/euler", QUEUE_SIZE, &TurtleMotion::chatterIMUEuler, this)),
                 desiredRoll(0),
                 desiredPitch(0),
                 desiredYaw(0),
@@ -107,15 +115,16 @@ namespace motion_controller {
                 rollPID(false, 0, 0, 0, 0, 0),
                 pitchPID(false, 0, 0, 0, 0, 0),
                 yawPID(true, .06, 0.0, .001, 0, 2),
-                enabled(false)
+                enabled(false),
+				srv_setRollPitchAngles(node.advertiseService("SetRollPitchAngles", &TurtleMotion::setRollPitchAngles, this)),
+				srv_setDepth(node.advertiseService("SetDepth", &TurtleMotion::setDepth, this)),
+				srv_setEnabled(node.advertiseService("SetEnabled", &TurtleMotion::setEnabled, this)),
+				srv_setForwardsPower(node.advertiseService("SetForwardsPower", &TurtleMotion::setForwardsPower, this)),
+				srv_setYawAngle(node.advertiseService("SetYawAngle", &TurtleMotion::setYawAngle, this)),
+				srv_zero(node.advertiseService("Zero", &TurtleMotion::zero, this)),
+				srv_initMotors(node.advertiseService("InitMotors", &TurtleMotion::initMotors, this))
 		{
-			node.advertiseService("turtle_motion/SetRollPitchAngles", &TurtleMotion::setRollPitchAngles, this);
-			node.advertiseService("turtle_motion/SetDepth", &TurtleMotion::setDepth, this);
-			node.advertiseService("turtle_motion/SetEnabled", &TurtleMotion::setEnabled, this);
-			node.advertiseService("turtle_motion/SetForwardsPower", &TurtleMotion::setForwardsPower, this);
-			node.advertiseService("turtle_motion/SetYawAngle", &TurtleMotion::setYawAngle, this);
-			node.advertiseService("turtle_motion/Zero", &TurtleMotion::zero, this);
-			node.advertiseService("turtle_motion/InitMotors", &TurtleMotion::initMotors, this);
+
         }
 
 

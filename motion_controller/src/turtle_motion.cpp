@@ -174,11 +174,13 @@ bool turn(float degrees)
 
  */
 
-void TurtleMotion::chatterIMUEuler(const geometry_msgs::Vector3Stamped &vector)
+void TurtleMotion::chatterIMUEuler(const geometry_msgs::Vector3Stamped::ConstPtr &vector)
 {
-	sensorRoll = static_cast<float>(vector.vector.x);
-	sensorPitch = static_cast<float>(vector.vector.y);
-	sensorYaw = static_cast<float>(vector.vector.z);
+	ROS_INFO("Got IMU data!");
+
+	sensorRoll = static_cast<float>(vector->vector.x);
+	sensorPitch = static_cast<float>(vector->vector.y);
+	sensorYaw = static_cast<float>(vector->vector.z);
 
 	updateAngularPIDLoops();
 }
@@ -188,13 +190,20 @@ void TurtleMotion::chatterIMUEuler(const geometry_msgs::Vector3Stamped &vector)
 bool TurtleMotion::setDepth(motion_controller::SetDepthRequest & request, motion_controller::SetDepthResponse & response)
 {
 	desiredDepth = request.depth;
+
+	ROS_INFO("setDepth() to %.02f m", desiredDepth);
+
 	// TODO: depth PID
+
+	return true;
 }
 
 bool TurtleMotion::setForwardsPower(motion_controller::SetForwardsPowerRequest & request, motion_controller::SetForwardsPowerResponse & response)
 {
 	forwardsMotionPowers.setPower(M_HORIZ_LEFT, request.forwardsPower);
 	forwardsMotionPowers.setPower(M_HORIZ_RIGHT, request.forwardsPower);
+
+	return true;
 }
 
 bool TurtleMotion::setRollPitchAngles(motion_controller::SetRollPitchAnglesRequest & request, motion_controller::SetRollPitchAnglesResponse & response)
@@ -206,6 +215,8 @@ bool TurtleMotion::setRollPitchAngles(motion_controller::SetRollPitchAnglesReque
 	pitchPID.setTarget(desiredPitch);
 
 	updateAngularPIDLoops();
+
+	return true;
 }
 bool TurtleMotion::setYawAngle(motion_controller::SetYawAngleRequest & request, motion_controller::SetYawAngleResponse & response)
 {
@@ -213,6 +224,8 @@ bool TurtleMotion::setYawAngle(motion_controller::SetYawAngleRequest & request, 
 	yawPID.setTarget(desiredYaw);
 
 	updateAngularPIDLoops();
+
+	return true;
 }
 bool TurtleMotion::zero(motion_controller::ZeroRequest & request, motion_controller::ZeroResponse & response)
 {
@@ -225,12 +238,16 @@ bool TurtleMotion::zero(motion_controller::ZeroRequest & request, motion_control
 	rollPID.setTarget(desiredRoll);
 
 	updateAngularPIDLoops();
+
+	return true;
 }
 bool TurtleMotion::setEnabled(motion_controller::SetEnabledRequest & request, motion_controller::SetEnabledResponse & response)
 {
 	enabled = request.enabled;
 
 	updateOutputs();
+
+	return true;
 }
 
 // update outputs based on current PID values
@@ -272,9 +289,11 @@ bool TurtleMotion::initMotors(motion_controller::InitMotorsRequest &request,
 
 int main(int argc, char **argv)
 {
-	ros::init(argc, argv, "turtle_motion");
+	ros::init(argc, argv, "motion_controller");
 		
 	motion_controller::TurtleMotion turtleMotion;
-	
+
+	ROS_INFO("Motion controller started!");
+
 	ros::spin();
 }
