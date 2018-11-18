@@ -6,11 +6,11 @@
 
 #define NUM_MOTORS 6
 
-#define M_VERT_FRONTLEFT 3
-#define M_VERT_BACKLEFT 2
-#define M_VERT_BACKRIGHT 6
-#define M_VERT_FRONTRIGHT 5
-#define M_HORIZ_LEFT 1
+#define M_VERT_FRONTLEFT 1
+#define M_VERT_BACKLEFT 3
+#define M_VERT_BACKRIGHT 5
+#define M_VERT_FRONTRIGHT 6
+#define M_HORIZ_LEFT 2
 #define M_HORIZ_RIGHT 4
 
 // Convenience header for ros_esccontrol.
