@@ -11,6 +11,8 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
 )
 
+find_package(Threads)
+
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
@@ -121,6 +123,7 @@ include_directories(
 
 # build oscpack
 add_subdirectory(oscpack)
+add_subdirectory(osc99)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -131,6 +134,8 @@ add_subdirectory(oscpack)
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(${PROJECT_NAME} src/ros_ngimu.cpp src/ros_ngimu.h)
+
+add_executable(ngimu_example src/NGIMU-C-Cpp-Example.cpp src/NgimuReceive.c)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -147,6 +152,8 @@ target_link_libraries(${PROJECT_NAME}
    ${catkin_LIBRARIES}
    oscpack
 )
+
+target_link_libraries(ngimu_example osc99 Threads::Threads)
 
 #############
 ## Install ##

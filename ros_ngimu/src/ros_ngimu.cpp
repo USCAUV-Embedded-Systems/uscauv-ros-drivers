@@ -33,7 +33,7 @@ namespace ros_ngimu {
 		// many packets appear to be corrupt and their size is not a multiple of 4
 		if(OSCMessage.second % 4 != 0)
 		{
-			//std::cout << "Skipping corrupt packet..." << std::endl;
+			std::cout << "Skipping corrupt packet..." << std::endl;
 		}
 		else
 		{
@@ -55,7 +55,7 @@ namespace ros_ngimu {
 			}
 			catch(osc::MalformedBundleException & ex)
 			{
-				// corrupt data, ignore
+				std::cout << "Skipping malformed packet..." << std::endl;
 			}
 
 		}
@@ -224,6 +224,8 @@ namespace ros_ngimu {
 			quaternionPublisher(node.advertise<geometry_msgs::QuaternionStamped>(NODE_NAME "/quaternion", QUEUE_SIZE)),
 			accelPublisher(node.advertise<geometry_msgs::Vector3Stamped>(NODE_NAME "/earthAccel", QUEUE_SIZE))
 	{
+		serialPort.set_option(asio::serial_port::baud_rate(9600));
+
 		// start the io service reading
 		asio::async_read_until(serialPort, serialBuffer, SLIP_END,
 							   std::bind(&ros_ngimu::onSerialRead, this, std::placeholders::_1, std::placeholders::_2));
