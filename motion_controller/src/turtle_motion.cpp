@@ -13,7 +13,10 @@ void TurtleMotion::updateAngularPIDLoops()
 	{
 		rollPID.update(sensorRoll);
 		pitchPID.update(sensorPitch);
-		yawPID.update(sensorYaw);
+
+		float yawCorrection = yawPID.update(sensorYaw);
+		yawPIDPowers.setPower(M_HORIZ_RIGHT, yawCorrection);
+		pitchPIDPowers.setPower(M_HORIZ_LEFT, yawCorrection);
 
 		updateOutputs();
 	}
@@ -21,7 +24,7 @@ void TurtleMotion::updateAngularPIDLoops()
 
 void TurtleMotion::chatterIMUEuler(const geometry_msgs::Vector3Stamped::ConstPtr &vector)
 {
-	ROS_INFO("Got IMU data!");
+	//ROS_INFO("Got IMU data!");
 
 	sensorRoll = static_cast<float>(vector->vector.x);
 	sensorPitch = static_cast<float>(vector->vector.y);
@@ -103,13 +106,15 @@ void TurtleMotion::updateOutputs()
 	if(enabled)
 	{
 		// set motor outputs by adding each PID loop's outputs together.
-		MotorPowers sumMotorPowers = rollPIDPowers + pitchPIDPowers + yawPIDPowers + depthPIDPowers + forwardsMotionPowers;
+
+		sumMotorPowers = rollPIDPowers + pitchPIDPowers + yawPIDPowers + depthPIDPowers + forwardsMotionPowers;
 	}
 
 	for(int motorNum = 1; motorNum <= NUM_MOTORS; ++motorNum)
 	{
 		ros_esccontrol::setMotor(motorNum, sumMotorPowers.getPower(motorNum), throttlePublisher);
 	}
+
 }
 
 bool TurtleMotion::initMotors(motion_controller::InitMotorsRequest &request,
@@ -125,6 +130,8 @@ bool TurtleMotion::initMotors(motion_controller::InitMotorsRequest &request,
 	ros_esccontrol::setMotor(M_VERT_BACKRIGHT, 0, throttlePublisher);
 	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	ROS_INFO("Ready.");
+
+	return true;
 }
 
 

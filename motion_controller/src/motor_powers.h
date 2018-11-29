@@ -21,7 +21,14 @@ public:
 	MotorPowers() = default;
 	
 	// default assignment and copy constructor
-	MotorPowers & operator=(const MotorPowers & other) = default;
+	MotorPowers & operator=(const MotorPowers & other)
+	{
+		for(int index = 0; index < NUM_MOTORS; index++)
+		{
+			motorPowers[index] = other.motorPowers[index];
+		}
+	}
+
 	MotorPowers(const MotorPowers & other) = default;
 	
 	// get and set motor powers.
