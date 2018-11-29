@@ -18,6 +18,8 @@
 #include "OscMessage.h"
 #include <stddef.h>
 
+#include <functional>
+
 //------------------------------------------------------------------------------
 // Definitions
 
@@ -34,7 +36,7 @@
 typedef struct {
     char contents[MAX_OSC_PACKET_SIZE];
     size_t size;
-    void ( *processMessage)(const OscTimeTag * const oscTimeTag, OscMessage * const oscMessage);
+	std::function<void(const OscTimeTag * const, OscMessage * const)> processMessage;
 } OscPacket;
 
 //------------------------------------------------------------------------------

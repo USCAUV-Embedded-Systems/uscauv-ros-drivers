@@ -92,7 +92,6 @@ OscError OscSlipEncodePacket(const OscPacket * const oscPacket, size_t * const s
  */
 void OscSlipDecoderInitialise(OscSlipDecoder * const oscSlipDecoder) {
     oscSlipDecoder->bufferIndex = 0;
-    oscSlipDecoder->processPacket = NULL;
 }
 
 /**

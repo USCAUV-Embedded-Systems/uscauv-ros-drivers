@@ -1,5 +1,5 @@
 /**
- * @file NgimuReceive.c
+ * @file NgimuReceive.cpp
  * @author Seb Madgwick
  * @brief Module for receiving messages from an NGIMU.
  */

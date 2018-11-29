@@ -122,7 +122,6 @@ include_directories(
 )
 
 # build oscpack
-add_subdirectory(oscpack)
 add_subdirectory(osc99)
 
 ## Add cmake target dependencies of the library
@@ -135,7 +134,7 @@ add_subdirectory(osc99)
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(${PROJECT_NAME} src/ros_ngimu.cpp src/ros_ngimu.h)
 
-add_executable(ngimu_example src/NGIMU-C-Cpp-Example.cpp src/NgimuReceive.c)
+add_executable(ngimu_example src/NGIMU-C-Cpp-Example.cpp src/NgimuReceive.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -149,8 +148,7 @@ add_executable(ngimu_example src/NGIMU-C-Cpp-Example.cpp src/NgimuReceive.c)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(${PROJECT_NAME}
-   ${catkin_LIBRARIES}
-   oscpack
+   ${catkin_LIBRARIES} osc99
 )
 
 target_link_libraries(ngimu_example osc99 Threads::Threads)

@@ -13,9 +13,9 @@
 #include <geometry_msgs/QuaternionStamped.h>
 #include <std_msgs/Header.h>
 
-#include <osc/OscReceivedElements.h>
-
 #include <ros/ros.h>
+
+#include "Osc99.h"
 
 namespace ros_ngimu
 {
@@ -37,7 +37,12 @@ class ros_ngimu
 	// ASIO variables
 	asio::io_service io_service;
 	asio::serial_port serialPort;
-	asio::streambuf serialBuffer;
+
+	// data for OSC library
+	OscSlipDecoder oscSlipDecoder;
+
+	// only one byte, weird stuff happened when I tried to use a larger buffer
+	uint8_t serialBuffer;
 
 	// publishers
 	ros::Publisher eulerPublisher;
@@ -52,21 +57,21 @@ class ros_ngimu
 	// ASIO event handler for characters read
 	void onSerialRead(const asio::error_code& errorCode, std::size_t bytes_transferred);
 
-	// decodes the first packet from the given buffer from SLIP to plain bytes.
-	// Returns decoded byte array and its length.
-	// On error, prints a ROS error and returns as much of the message as it could
-	static std::pair<std::shared_ptr<char>, size_t> SLIPDecode(asio::streambuf * inputBuffer, size_t size);
-
-	// called when an OSC message is received from the IMU
-	void onGetMessage(osc::ReceivedMessage const & message);
-
 	// Prepare a ROS message header for sending the the next message
 	void prepareHeader(std_msgs::Header & header);
+
+
 
 public:
 
 	// construct with serial port
 	ros_ngimu(std::string const & serialPortPath, ros::NodeHandle & node);
+
+	// callback for OSC packets
+	void onGetPacket(OscPacket * const oscPacket);
+
+	// callback for OSC messages
+	void onGetMessage(const OscTimeTag * const oscTimeTag, OscMessage * const oscMessage);
 
 	// run event loop (never returns until node is shutdown)
 	void run();

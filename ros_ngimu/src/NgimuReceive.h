@@ -7,10 +7,6 @@
 #ifndef NGIMU_RECEIVE_H
 #define NGIMU_RECEIVE_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 //------------------------------------------------------------------------------
 // Includes
 
@@ -57,6 +53,17 @@ typedef struct {
     float yaw;
 } NgimuEuler;
 
+/**
+ * @brief Timestamp and argument values for "/earth" message.
+ */
+typedef struct {
+	OscTimeTag timestamp;
+	float x;
+	float y;
+	float z;
+} NgimuEarthAccel;
+
+
 //------------------------------------------------------------------------------
 // Function prototypes
 
@@ -68,9 +75,6 @@ void NgimuReceiveSetEulerCallback(void (*newEulerCallback)(const NgimuEuler ngim
 void NgimuReceiveProcessSerialByte(const char byte);
 void NgimuReceiveProcessUdpPacket(const char * const source, const size_t sourceSize);
 
-#ifdef __cplusplus
-}
-#endif
 
 #endif
 

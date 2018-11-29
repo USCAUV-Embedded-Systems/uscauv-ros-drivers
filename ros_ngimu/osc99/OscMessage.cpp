@@ -786,7 +786,7 @@ bool OscMessageIsArgumentAvailable(OscMessage * const oscMessage) {
  */
 OscTypeTag OscMessageGetArgumentType(OscMessage * const oscMessage) {
     if (oscMessage->oscTypeTagStringIndex > oscMessage->oscTypeTagStringLength) {
-        return '\0'; // error: end of type tag string
+        return static_cast<OscTypeTag>('\0'); // error: end of type tag string
     }
     return (OscTypeTag) oscMessage->oscTypeTagString[oscMessage->oscTypeTagStringIndex];
 }

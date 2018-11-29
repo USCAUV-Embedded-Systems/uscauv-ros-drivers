@@ -16,6 +16,8 @@
 #include "OscError.h"
 #include "OscPacket.h"
 
+#include <functional>
+
 //------------------------------------------------------------------------------
 // Definitions
 
@@ -32,7 +34,7 @@
 typedef struct {
     char buffer[OSC_SLIP_DECODER_BUFFER_SIZE];
     unsigned int bufferIndex;
-    void ( *processPacket)(OscPacket * const oscPacket);
+	std::function<void(OscPacket * const oscPacket)> processPacket;
 } OscSlipDecoder;
 
 //------------------------------------------------------------------------------

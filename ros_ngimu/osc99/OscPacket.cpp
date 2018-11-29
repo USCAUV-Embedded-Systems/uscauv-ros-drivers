@@ -69,10 +69,10 @@ void OscPacketInitialise(OscPacket * const oscPacket) {
  */
 OscError OscPacketInitialiseFromContents(OscPacket * const oscPacket, const void * const oscContents) {
     oscPacket->processMessage = NULL;
-    if (OscContentsIsMessage(oscContents) == true) {
+    if (OscContentsIsMessage(oscContents)) {
         return OscMessageToCharArray((OscMessage *) oscContents, &oscPacket->size, oscPacket->contents, MAX_OSC_PACKET_SIZE);
     }
-    if (OscContentsIsBundle(oscContents) == true) {
+    if (OscContentsIsBundle(oscContents)) {
         return OscBundleToCharArray((OscBundle *) oscContents, &oscPacket->size, oscPacket->contents, MAX_OSC_PACKET_SIZE);
     }
     return OscErrorInvalidContents; // error: invalid or uninitialised OSC contents
@@ -164,9 +164,9 @@ static OscError DeconstructContents(OscPacket * const oscPacket, const OscTimeTa
     }
 
     // Contents is an OSC message
-    if (OscContentsIsMessage(oscContents) == true) {
+    if (OscContentsIsMessage(oscContents)) {
         OscMessage oscMessage;
-        const OscError oscError = OscMessageInitialiseFromCharArray(&oscMessage, oscContents, contentsSize);
+        const OscError oscError = OscMessageInitialiseFromCharArray(&oscMessage, reinterpret_cast<char const * const>(oscContents), contentsSize);
         if (oscError != OscErrorNone) {
             return oscError; // error: message initialisation failed
         }
@@ -175,15 +175,15 @@ static OscError DeconstructContents(OscPacket * const oscPacket, const OscTimeTa
     }
 
     // Contents is an OSC bundle
-    if (OscContentsIsBundle(oscContents) == true) {
+    if (OscContentsIsBundle(oscContents)) {
         OscBundle oscBundle;
-        OscError oscError = OscBundleInitialiseFromCharArray(&oscBundle, oscContents, contentsSize);
+        OscError oscError = OscBundleInitialiseFromCharArray(&oscBundle, reinterpret_cast<char const * const>(oscContents), contentsSize);
         if (oscError != OscErrorNone) {
             return oscError; // error: bundle initialisation failed
         }
         do {
             OscBundleElement oscBundleElement;
-            if (OscBundleIsBundleElementAvailable(&oscBundle) == false) {
+            if (!OscBundleIsBundleElementAvailable(&oscBundle)) {
                 break; // no more bundle elements
             }
             oscError = OscBundleGetBundleElement(&oscBundle, &oscBundleElement);

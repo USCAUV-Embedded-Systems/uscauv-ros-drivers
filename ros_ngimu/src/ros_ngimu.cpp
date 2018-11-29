@@ -8,160 +8,57 @@
 #include <functional>
 #include <iomanip>
 
-#include <osc/OscReceivedElements.h>
-#include <osc/OscPrintReceivedElements.h>
-
 #define SERIAL_PORT "/dev/ttyACM0"
 #define QUEUE_SIZE 100
 #define NODE_NAME "ngimu"
 
 namespace ros_ngimu {
 
-// SLIP binary constants
-	const char SLIP_END = static_cast<const char>(0xC0);
-	const char SLIP_ESC = static_cast<const char>(0xDB);
-	const char SLIP_ESC_END = static_cast<const char>(0xDC);
-	const char SLIP_ESC_ESC = static_cast<const char>(0xDD);
 
 
 	void ros_ngimu::onSerialRead(const asio::error_code &errorCode, size_t bytes_transferred) {
-		// transfer message, up to and including the delimiter, to our char array
-		std::pair<std::shared_ptr<char>, size_t> OSCMessage = SLIPDecode(&serialBuffer, bytes_transferred);
 
-		//std::cout << "packet size: " << OSCMessage.second << std::endl;
+		// send byte to osc99
+		OscSlipDecoderProcessByte(&oscSlipDecoder, serialBuffer);
 
-		// many packets appear to be corrupt and their size is not a multiple of 4
-		if(OSCMessage.second % 4 != 0)
-		{
-			std::cout << "Skipping corrupt packet..." << std::endl;
-		}
-		else
-		{
-			try
-			{
-				osc::ReceivedPacket oscPacket(OSCMessage.first.get(), OSCMessage.second);
-
-				//std::cout << oscPacket << std::endl;
-
-				if(oscPacket.IsBundle())
-				{
-					osc::ReceivedBundle bundle(oscPacket);
-
-					for(auto messageIterator = bundle.ElementsBegin(); messageIterator != bundle.ElementsEnd(); ++messageIterator)
-					{
-						onGetMessage(osc::ReceivedMessage(*messageIterator));
-					}
-				}
-			}
-			catch(osc::MalformedBundleException & ex)
-			{
-				std::cout << "Skipping malformed packet..." << std::endl;
-			}
-
-		}
-
-		// queue ourselves up for the next packet
-		asio::async_read_until(serialPort, serialBuffer, SLIP_END,
-							   std::bind(&ros_ngimu::onSerialRead, this, std::placeholders::_1, std::placeholders::_2));
+		// queue ourselves up for the next byte
+		asio::async_read(serialPort, asio::buffer(&serialBuffer, 1),
+						 std::bind(&ros_ngimu::onSerialRead, this, std::placeholders::_1, std::placeholders::_2));
 	}
 
-	std::pair<std::shared_ptr<char>, size_t> ros_ngimu::SLIPDecode(asio::streambuf *inputBuffer, size_t size) {
-		// note: the decoded messge will have <= size bytes, so we just create an array of size bytes
-		std::shared_ptr<char> decodedBytes(new char[size], array_deleter<char>());
-
-		std::istream bufferStream(inputBuffer);
-
-		bool seenEnd = false;
-		bool prevCharWasEsc = false;
-		size_t nextOutputIndex = 0;
-		for (size_t inputIndex = 0; inputIndex < size && !seenEnd; ++inputIndex) {
-			char currByte;
-			bufferStream >> currByte;
-			//printf("%hhx ", currByte);
-
-			if (inputIndex == size - 1) {
-				if (currByte != SLIP_END) {
-					ROS_ERROR("SLIP packet does not end in a END byte! Last index was: %lu", size);
-				}
-			}
-
-			switch (currByte) {
-				case SLIP_END:
-					seenEnd = true;
-					prevCharWasEsc = false;
-
-					// don't copy byte
-					break;
-
-				case SLIP_ESC:
-					prevCharWasEsc = true;
-					// don't copy byte
-					break;
-
-				case SLIP_ESC_END:
-					if (prevCharWasEsc) {
-						// write an END
-						decodedBytes.get()[nextOutputIndex] = SLIP_END;
-						++nextOutputIndex;
-					} else {
-						// no escape character, write an ESC_END
-						decodedBytes.get()[nextOutputIndex] = SLIP_ESC_END;
-						++nextOutputIndex;
-					}
-
-					prevCharWasEsc = false;
-					break;
-
-				case SLIP_ESC_ESC:
-					if (prevCharWasEsc) {
-						// write an ESC
-						decodedBytes.get()[nextOutputIndex] = SLIP_ESC;
-						++nextOutputIndex;
-					} else {
-						// no escape character, write an ESC_ESC
-						decodedBytes.get()[nextOutputIndex] = SLIP_ESC_ESC;
-						++nextOutputIndex;
-					}
-
-					prevCharWasEsc = false;
-					break;
-
-				default:
-					//plain old bytes
-
-					if (prevCharWasEsc) {
-						ROS_ERROR("Unrecognized SLIP escape sequence!");
-					}
-
-					decodedBytes.get()[nextOutputIndex] = currByte;
-					++nextOutputIndex;
-
-					break;
-			}
-
-		}
-
-		return std::make_pair(decodedBytes, nextOutputIndex);
-	}
-
-	void ros_ngimu::onGetMessage(osc::ReceivedMessage const & message)
+	void ros_ngimu::onGetPacket(OscPacket * const oscPacket)
 	{
-		osc::ReceivedMessage::const_iterator messageIter = message.ArgumentsBegin();
+		// set callback for each message to the message function
+		oscPacket->processMessage = std::bind(&ros_ngimu::onGetMessage, this, std::placeholders::_1, std::placeholders::_2);
 
+		// try to process the packet
+		OscError oscError = OscPacketProcessMessages(oscPacket);
+		if (oscError != OscErrorNone) {
+			ROS_WARN("OSC packet decode failed: %s", OscErrorGetMessage(oscError));
+		}
+	}
+
+	void ros_ngimu::onGetMessage(const OscTimeTag * const oscTimeTag, OscMessage * const oscMessage)
+	{
 		// configure float formatting for log messages
 		std::cout.setf(std::ios::fixed, std::ios::floatfield);
 		std::cout.setf(std::ios::showpoint);
 
-		if(message.AddressPattern() == std::string("/quaternion"))
+		if(OscAddressMatch(oscMessage->oscAddressPattern, "/quaternion"))
 		{
-			quaternion.quaternion.w = messageIter->AsFloat();
-			++messageIter;
-			quaternion.quaternion.x = messageIter->AsFloat();
-			++messageIter;
-			quaternion.quaternion.y = messageIter->AsFloat();
-			++messageIter;
-			quaternion.quaternion.z = messageIter->AsFloat();
-			++messageIter;
+			// the numbers are floats, but ROS requires doubles.
+			// so, we have to use these floats as an intermediary
+			float w, x, y, z;
+
+			OscMessageGetArgumentAsFloat32(oscMessage, &w);
+			OscMessageGetArgumentAsFloat32(oscMessage, &x);
+			OscMessageGetArgumentAsFloat32(oscMessage, &y);
+			OscMessageGetArgumentAsFloat32(oscMessage, &z);
+
+			quaternion.quaternion.w = w;
+			quaternion.quaternion.x = x;
+			quaternion.quaternion.y = y;
+			quaternion.quaternion.z = z;
 
 			//std::cout << "Got quaternion: " << quaternion.quaternion.w << ", " << quaternion.quaternion.x << ", " << quaternion.quaternion.y << ", " << quaternion.quaternion.z << std::endl;
 
@@ -169,14 +66,18 @@ namespace ros_ngimu {
 			quaternionPublisher.publish(quaternion);
 
 		}
-		else if(message.AddressPattern() == std::string("/earth"))
+
+		else if(OscAddressMatch(oscMessage->oscAddressPattern, "/earth"))
 		{
-			earthAccel.vector.x = messageIter->AsFloat();
-			++messageIter;
-			earthAccel.vector.y = messageIter->AsFloat();
-			++messageIter;
-			earthAccel.vector.z = messageIter->AsFloat();
-			++messageIter;
+			float x, y, z;
+
+			OscMessageGetArgumentAsFloat32(oscMessage, &x);
+			OscMessageGetArgumentAsFloat32(oscMessage, &y);
+			OscMessageGetArgumentAsFloat32(oscMessage, &z);
+
+			earthAccel.vector.x = x;
+			earthAccel.vector.y = y;
+			earthAccel.vector.z = z;
 
 			//std::cout << "Got earth: " << earthAccel.vector.x << ", " << earthAccel.vector.y << ", " << earthAccel.vector.z << std::endl;
 
@@ -184,14 +85,17 @@ namespace ros_ngimu {
 			accelPublisher.publish(earthAccel);
 
 		}
-		else if(message.AddressPattern() == std::string("/euler"))
+		else if(OscAddressMatch(oscMessage->oscAddressPattern, "/euler"))
 		{
-			eulerAngles.vector.x = messageIter->AsFloat();
-			++messageIter;
-			eulerAngles.vector.y = messageIter->AsFloat();
-			++messageIter;
-			eulerAngles.vector.z = messageIter->AsFloat();
-			++messageIter;
+			float x, y, z;
+
+			OscMessageGetArgumentAsFloat32(oscMessage, &x);
+			OscMessageGetArgumentAsFloat32(oscMessage, &y);
+			OscMessageGetArgumentAsFloat32(oscMessage, &z);
+
+			eulerAngles.vector.x = x;
+			eulerAngles.vector.y = y;
+			eulerAngles.vector.z = z;
 
 			//std::cout << "Got euler: " << eulerAngles.vector.x << ", " << eulerAngles.vector.y << ", " << eulerAngles.vector.z << std::endl;
 
@@ -199,6 +103,7 @@ namespace ros_ngimu {
 			eulerPublisher.publish(eulerAngles);
 
 		}
+
 	}
 
 	void ros_ngimu::prepareHeader(std_msgs::Header & header)
@@ -219,15 +124,20 @@ namespace ros_ngimu {
 	ros_ngimu::ros_ngimu(std::string const &serialPortPath, ros::NodeHandle & node) :
 			io_service(),
 			serialPort(io_service, serialPortPath),
+			oscSlipDecoder(),
 			serialBuffer(),
 			eulerPublisher(node.advertise<geometry_msgs::Vector3Stamped>(NODE_NAME "/euler", QUEUE_SIZE)),
 			quaternionPublisher(node.advertise<geometry_msgs::QuaternionStamped>(NODE_NAME "/quaternion", QUEUE_SIZE)),
 			accelPublisher(node.advertise<geometry_msgs::Vector3Stamped>(NODE_NAME "/earthAccel", QUEUE_SIZE))
 	{
-		serialPort.set_option(asio::serial_port::baud_rate(9600));
+		serialPort.set_option(asio::serial_port::baud_rate(115200));
+
+		// Initialise OSC reader
+		OscSlipDecoderInitialise(&oscSlipDecoder);
+		oscSlipDecoder.processPacket = std::bind(&ros_ngimu::onGetPacket, this, std::placeholders::_1);
 
 		// start the io service reading
-		asio::async_read_until(serialPort, serialBuffer, SLIP_END,
+		asio::async_read(serialPort, asio::buffer(&serialBuffer, 1),
 							   std::bind(&ros_ngimu::onSerialRead, this, std::placeholders::_1, std::placeholders::_2));
 	}
 
