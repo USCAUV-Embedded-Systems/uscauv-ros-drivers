@@ -112,9 +112,10 @@ namespace motion_controller {
                 yawPIDPowers(),
                 depthPIDPowers(),
                 forwardsMotionPowers(),
-                rollPID(false, 0, 0, 0, 0, 0),
-                pitchPID(false, 0, 0, 0, 0, 0),
-                yawPID(true, .06, 0.0, .001, 0, 2),
+                rollPID(false, .025, 0, 0, 0, 0), //edited Jan 24th
+                pitchPID(false, .025, 0, 0, 0, 0),//CHANGE THIS DURRING WET TEST!!!!!
+                yawPID(true, .06, /*0.0075*/0, .001, 0, 2),
+                /*yawPID(false, 0, 0, 0, 0, 0),*/
                 enabled(false),
 				srv_setRollPitchAngles(node.advertiseService("SetRollPitchAngles", &TurtleMotion::setRollPitchAngles, this)),
 				srv_setDepth(node.advertiseService("SetDepth", &TurtleMotion::setDepth, this)),

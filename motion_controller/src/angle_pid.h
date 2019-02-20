@@ -141,7 +141,7 @@ public:
 		
 		if(_debug)
 		{
-			ROS_INFO("%.04f, %.04f, %.04f, %.04f, %.04f, %.04f, %.04f", _target, current, error, P, I, D, correction);
+			ROS_INFO("T: %.04f, Curr: %.04f, E: %.04f, P: %.04f, I: %.04f, D: %.04f, Corr: %.04f", _target, current, error, P, I, D, correction);
 		}
 		
 		// check for value under threshold

@@ -11,12 +11,22 @@ void TurtleMotion::updateAngularPIDLoops()
 {
 	if(enabled)
 	{
-		rollPID.update(sensorRoll);
-		pitchPID.update(sensorPitch);
+		float rollCorrection = rollPID.update(sensorRoll);
+		rollPIDPowers.setPower(M_VERT_FRONTRIGHT, -1 * rollCorrection);
+		rollPIDPowers.setPower(M_VERT_BACKRIGHT, -1 * rollCorrection);
+		rollPIDPowers.setPower(M_VERT_FRONTLEFT, rollCorrection);
+		rollPIDPowers.setPower(M_VERT_BACKLEFT, rollCorrection);
+
+
+		float pitchCorrection = pitchPID.update(sensorPitch);
+		pitchPIDPowers.setPower(M_VERT_FRONTRIGHT, pitchCorrection);
+		pitchPIDPowers.setPower(M_VERT_FRONTLEFT, pitchCorrection);
+		pitchPIDPowers.setPower(M_VERT_BACKRIGHT,-1*pitchCorrection);
+		pitchPIDPowers.setPower(M_VERT_BACKLEFT,-1*pitchCorrection);
 
 		float yawCorrection = yawPID.update(sensorYaw);
-		yawPIDPowers.setPower(M_HORIZ_RIGHT, yawCorrection);
-		pitchPIDPowers.setPower(M_HORIZ_LEFT, yawCorrection);
+		yawPIDPowers.setPower(M_HORIZ_RIGHT, -yawCorrection);
+		yawPIDPowers.setPower(M_HORIZ_LEFT, yawCorrection);
 
 		updateOutputs();
 	}
@@ -26,8 +36,8 @@ void TurtleMotion::chatterIMUEuler(const geometry_msgs::Vector3Stamped::ConstPtr
 {
 	//ROS_INFO("Got IMU data!");
 
-	sensorRoll = static_cast<float>(vector->vector.x);
-	sensorPitch = static_cast<float>(vector->vector.y);
+	sensorRoll = static_cast<float>(vector->vector.y);
+	sensorPitch = static_cast<float>(vector->vector.x);
 	sensorYaw = static_cast<float>(vector->vector.z);
 
 	updateAngularPIDLoops();
@@ -85,6 +95,8 @@ bool TurtleMotion::zero(motion_controller::ZeroRequest & request, motion_control
 	pitchPID.setTarget(desiredPitch);
 	rollPID.setTarget(desiredRoll);
 
+	ROS_INFO("Set angular targets to (%.02f, %.02f, %.02f)", desiredRoll, desiredPitch, desiredYaw);
+
 	updateAngularPIDLoops();
 
 	return true;
@@ -103,11 +115,18 @@ void TurtleMotion::updateOutputs()
 {
 	MotorPowers sumMotorPowers;
 
+	// temp hover code
+	MotorPowers hoverPowers;
+	//hoverPowers.setPower(M_VERT_FRONTLEFT, -.3f);
+	//hoverPowers.setPower(M_VERT_FRONTRIGHT, -.09f);
+	//hoverPowers.setPower(M_VERT_BACKLEFT, -.25f);
+	//hoverPowers.setPower(M_VERT_BACKRIGHT, -.21f);
+
 	if(enabled)
 	{
 		// set motor outputs by adding each PID loop's outputs together.
 
-		sumMotorPowers = rollPIDPowers + pitchPIDPowers + yawPIDPowers + depthPIDPowers + forwardsMotionPowers;
+		sumMotorPowers = rollPIDPowers + pitchPIDPowers + yawPIDPowers + depthPIDPowers + forwardsMotionPowers + hoverPowers;
 	}
 
 	for(int motorNum = 1; motorNum <= NUM_MOTORS; ++motorNum)
