@@ -39,6 +39,7 @@ namespace motion_controller {
     private:
 
         ros::Subscriber imuSubscriber;
+        ros::Subscriber echoSubscriber;
 
         // setpoints
         float desiredRoll;
@@ -99,6 +100,7 @@ namespace motion_controller {
                 node("motion_controller"),
                 throttlePublisher(node.advertise<ros_esccontrol::ESCThrottle>("/esccontrol/esc_throttle", QUEUE_SIZE)),
                 imuSubscriber(node.subscribe("/ngimu/euler", QUEUE_SIZE, &TurtleMotion::chatterIMUEuler, this)),
+//echoSubscriber(node.subscribe("")),
                 desiredRoll(0),
                 desiredPitch(0),
                 desiredYaw(0),
