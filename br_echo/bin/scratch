@@ -1,0 +1,22 @@
+#!/usr/bin/env python2.7
+
+#simplePingExample.py
+from brping import Ping1D
+import time
+import rospy
+from builtins import input
+from std_msgs.msg import Int16
+
+def callback(data):
+    print("callback")
+    print("data: %s" % data)
+
+def scratch():
+    rospy.init_node('scratch', anonymous=True)
+    rospy.Subscriber("br_echo", Int16, callback)
+    rospy.spin()
+
+if __name__ == '__main__':
+    print("Main")
+    while True:
+        scratch()

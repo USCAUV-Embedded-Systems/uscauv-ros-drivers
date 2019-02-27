@@ -5,7 +5,7 @@ from brping import Ping1D
 import time
 import rospy
 from builtins import input
-from std_msgs.msg import String
+from std_msgs.msg import Int16
 
 #Make a new Ping
 myPing = Ping1D("/dev/ttyUSB0", 115200)
@@ -24,19 +24,19 @@ input("Press Enter to continue...")
 myPing.set_speed_of_sound(343000) #speef for air
 
 # initialize publisher
-def talker():
-    pub = rospy.Publisher('br_echo', String, queue_size=10)
-    rospy.init_node('talker', anonymous=True)
+def br_echo(x):
+    pub = rospy.Publisher('br_echo', Int16, queue_size=10)
+    rospy.init_node('br_echo', anonymous=True)
     rate = rospy.Rate(10)
-    pub.publish("hello")
-
+    send = (x)
+    pub.publish(send)
 # Read and print distance measurements with confidence
 while True:
-    print("Begin while loop")
     data = myPing.get_distance()
     if data:
         print("Distance: %s\tConfidence: %s%%" % (data["distance"], data["confidence"]))
-        talker()
+        send = (data["distance"])
+        br_echo(send)
     else:
         print("Failed to get distance data")
-    time.sleep(0.1)
+    time.sleep(3)
