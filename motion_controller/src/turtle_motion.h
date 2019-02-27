@@ -78,7 +78,7 @@ namespace motion_controller {
 		void updateAngularPIDLoops();
 
 		void chatterIMUEuler(const geometry_msgs::Vector3Stamped::ConstPtr &vector);
-
+        void chatterEcho(int data);
         // setpoint services
         bool setDepth(motion_controller::SetDepthRequest & request, motion_controller::SetDepthResponse & response);
 
@@ -100,7 +100,7 @@ namespace motion_controller {
                 node("motion_controller"),
                 throttlePublisher(node.advertise<ros_esccontrol::ESCThrottle>("/esccontrol/esc_throttle", QUEUE_SIZE)),
                 imuSubscriber(node.subscribe("/ngimu/euler", QUEUE_SIZE, &TurtleMotion::chatterIMUEuler, this)),
-//echoSubscriber(node.subscribe("")),
+                echoSubscriber(node.subscribe("br_echo", QUEUE_SIZE, &TurtleMotion::chatterEcho,this)),
                 desiredRoll(0),
                 desiredPitch(0),
                 desiredYaw(0),
