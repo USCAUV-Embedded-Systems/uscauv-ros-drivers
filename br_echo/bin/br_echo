@@ -28,7 +28,7 @@ def br_echo(x):
     pub = rospy.Publisher('br_echo', Int16, queue_size=10)
     rospy.init_node('br_echo', anonymous=True)
     rate = rospy.Rate(10)
-    send = (x)
+    send = x
     pub.publish(send)
 # Read and print distance measurements with confidence
 while True:
