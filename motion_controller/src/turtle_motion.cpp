@@ -43,9 +43,9 @@ void TurtleMotion::chatterIMUEuler(const geometry_msgs::Vector3Stamped::ConstPtr
 	updateAngularPIDLoops();
 }
 
-void TurtleMotion::chatterEcho(const std_msgs::Int16 &data) 
+void TurtleMotion::chatterEcho(const std_msgs::Int16 &msg) 
 {
-	ROS_INFO("Echo sensor value: %d",data);
+	ROS_INFO("Echo sensor value: %d",msg.data);
 }
 
 // setpoint services
