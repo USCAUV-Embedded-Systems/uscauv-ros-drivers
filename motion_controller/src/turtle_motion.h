@@ -8,13 +8,14 @@
 #include <geometry_msgs/Vector3Stamped.h>
 #include <geometry_msgs/Vector3.h>
 #include <std_msgs/Float64.h>
-
+#include "std_msgs/Int16.h"
 #include <chrono>
 #include <thread>
 #include <cmath>
 
 #include "motor_powers.h"
 #include "angle_pid.h"
+
 
 // generated header files for this service
 #include <motion_controller/SetDepth.h>
