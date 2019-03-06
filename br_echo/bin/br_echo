@@ -20,8 +20,8 @@ print("------------------------------------")
 
 input("Press Enter to continue...")
 
-#myPing.set_speed_of_sound(1450000) #speed for water
-myPing.set_speed_of_sound(343000) #speef for air
+myPing.set_speed_of_sound(1450000) #speed for water
+#myPing.set_speed_of_sound(343000) #speef for air
 
 # initialize publisher
 def br_echo(x):
@@ -39,4 +39,4 @@ while True:
         br_echo(send)
     else:
         print("Failed to get distance data")
-    time.sleep(3)
+    time.sleep(.1)
