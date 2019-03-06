@@ -39,4 +39,4 @@ while True:
         br_echo(send)
     else:
         print("Failed to get distance data")
-    time.sleep(3)
+    time.sleep(.1)
