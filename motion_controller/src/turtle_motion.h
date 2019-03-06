@@ -79,7 +79,7 @@ namespace motion_controller {
 		void updateAngularPIDLoops();
 
 		void chatterIMUEuler(const geometry_msgs::Vector3Stamped::ConstPtr &vector);
-        void chatterEcho(const std_msgs::Int16 &msg);
+        void chatterEcho(const std_msgs::Int16::ConstPtr &msg);
         // setpoint services
         bool setDepth(motion_controller::SetDepthRequest & request, motion_controller::SetDepthResponse & response);
 

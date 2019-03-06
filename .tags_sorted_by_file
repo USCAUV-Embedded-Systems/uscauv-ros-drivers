@@ -402,6 +402,7 @@ get	motion_controller/src/trap_int.cpp	/^double TrapezoidalIntegrator::get() con
 TrapezoidalIntegrator	motion_controller/src/trap_int.h	/^class TrapezoidalIntegrator {$/;"	c
 prevPoint	motion_controller/src/trap_int.h	/^		double prevPoint=0;$/;"	m	class:TrapezoidalIntegrator
 total	motion_controller/src/trap_int.h	/^		double total;$/;"	m	class:TrapezoidalIntegrator
+chatterEcho	motion_controller/src/turtle_motion.cpp	/^void TurtleMotion::chatterEcho(const std_msgs::Int16 &msg) $/;"	f	class:motion_controller::TurtleMotion
 chatterIMUEuler	motion_controller/src/turtle_motion.cpp	/^void TurtleMotion::chatterIMUEuler(const geometry_msgs::Vector3Stamped::ConstPtr &vector)$/;"	f	class:motion_controller::TurtleMotion
 initMotors	motion_controller/src/turtle_motion.cpp	/^bool TurtleMotion::initMotors(motion_controller::InitMotorsRequest &request,$/;"	f	class:motion_controller::TurtleMotion
 main	motion_controller/src/turtle_motion.cpp	/^int main(int argc, char **argv)$/;"	f
@@ -414,7 +415,7 @@ setYawAngle	motion_controller/src/turtle_motion.cpp	/^bool TurtleMotion::setYawA
 updateAngularPIDLoops	motion_controller/src/turtle_motion.cpp	/^void TurtleMotion::updateAngularPIDLoops()$/;"	f	class:motion_controller::TurtleMotion
 updateOutputs	motion_controller/src/turtle_motion.cpp	/^void TurtleMotion::updateOutputs()$/;"	f	class:motion_controller::TurtleMotion
 zero	motion_controller/src/turtle_motion.cpp	/^bool TurtleMotion::zero(motion_controller::ZeroRequest & request, motion_controller::ZeroResponse & response)$/;"	f	class:motion_controller::TurtleMotion
-QUEUE_SIZE	motion_controller/src/turtle_motion.h	28;"	d
+QUEUE_SIZE	motion_controller/src/turtle_motion.h	29;"	d
 TURTLE_MOTION_H	motion_controller/src/turtle_motion.h	3;"	d
 TurtleMotion	motion_controller/src/turtle_motion.h	/^        TurtleMotion() :$/;"	f	class:motion_controller::TurtleMotion
 TurtleMotion	motion_controller/src/turtle_motion.h	/^    class TurtleMotion {$/;"	c	namespace:motion_controller

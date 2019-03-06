@@ -1645,7 +1645,7 @@ QUATERNION_UPDATE_QUAT3_VALUE_INDEX	ros_navx_micro/src/navx_micro/_impl/imuproto
 QUATERNION_UPDATE_QUAT4_VALUE_INDEX	ros_navx_micro/src/navx_micro/_impl/imuprotocol.py	/^    QUATERNION_UPDATE_QUAT4_VALUE_INDEX =      14$/;"	v	class:IMUProtocol
 QUATERNION_UPDATE_TEMP_VALUE_INDEX	ros_navx_micro/src/navx_micro/_impl/imuprotocol.py	/^    QUATERNION_UPDATE_TEMP_VALUE_INDEX =       42$/;"	v	class:IMUProtocol
 QUATERNION_UPDATE_TERMINATOR_INDEX	ros_navx_micro/src/navx_micro/_impl/imuprotocol.py	/^    QUATERNION_UPDATE_TERMINATOR_INDEX =       51$/;"	v	class:IMUProtocol
-QUEUE_SIZE	motion_controller/src/turtle_motion.h	28;"	d
+QUEUE_SIZE	motion_controller/src/turtle_motion.h	29;"	d
 QUEUE_SIZE	motion_controller/src/turtle_motor_test.cpp	11;"	d	file:
 QUEUE_SIZE	ros_ngimu/src/ros_ngimu.cpp	12;"	d	file:
 ROS_ESCCONTROL_H	ros_esccontrol/include/ros_esccontrol.h	2;"	d
@@ -3338,6 +3338,7 @@ cend	ros_ngimu/asio/asio/ip/basic_resolver_results.hpp	/^  const_iterator cend()
 center_points	ros_esccontrol/src/controller_sub.cpp	/^const static int center_points[] = {1570, 1565, 1570, 1570, 1570, 1570};$/;"	v	file:
 character_size	ros_ngimu/asio/asio/serial_port_base.hpp	/^  class character_size$/;"	c	class:asio::serial_port_base
 chatterESCThrottle	ros_esccontrol/src/controller_sub.cpp	/^void Controller::chatterESCThrottle (const ros_esccontrol::ESCThrottleConstPtr &esc_state){$/;"	f	class:Controller
+chatterEcho	motion_controller/src/turtle_motion.cpp	/^void TurtleMotion::chatterEcho(const std_msgs::Int16 &msg) $/;"	f	class:motion_controller::TurtleMotion
 chatterIMUEuler	motion_controller/src/turtle_motion.cpp	/^void TurtleMotion::chatterIMUEuler(const geometry_msgs::Vector3Stamped::ConstPtr &vector)$/;"	f	class:motion_controller::TurtleMotion
 check_condition	ros_ngimu/asio/asio/impl/connect.hpp	/^    void check_condition(const asio::error_code& ec,$/;"	f	class:asio::detail::base_from_connect_condition
 check_condition	ros_ngimu/asio/asio/impl/connect.hpp	/^    void check_condition(const asio::error_code&, Iterator&, Iterator&)$/;"	f	class:asio::detail::base_from_connect_condition
