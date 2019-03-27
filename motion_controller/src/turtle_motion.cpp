@@ -43,6 +43,10 @@ void TurtleMotion::chatterIMUEuler(const geometry_msgs::Vector3Stamped::ConstPtr
 	updateAngularPIDLoops();
 }
 
+void TurtleMotion::chatterEcho(const std_msgs::Int16::ConstPtr &msg) 
+{
+	ROS_INFO("Echo sensor value: %d",msg->data);
+}
 
 // setpoint services
 bool TurtleMotion::setDepth(motion_controller::SetDepthRequest & request, motion_controller::SetDepthResponse & response)

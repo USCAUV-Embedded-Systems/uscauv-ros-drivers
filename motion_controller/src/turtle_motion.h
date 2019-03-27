@@ -8,13 +8,14 @@
 #include <geometry_msgs/Vector3Stamped.h>
 #include <geometry_msgs/Vector3.h>
 #include <std_msgs/Float64.h>
-
+#include <std_msgs/Int16.h>
 #include <chrono>
 #include <thread>
 #include <cmath>
 
 #include "motor_powers.h"
 #include "angle_pid.h"
+
 
 // generated header files for this service
 #include <motion_controller/SetDepth.h>
@@ -78,7 +79,7 @@ namespace motion_controller {
 		void updateAngularPIDLoops();
 
 		void chatterIMUEuler(const geometry_msgs::Vector3Stamped::ConstPtr &vector);
-
+        void chatterEcho(const std_msgs::Int16::ConstPtr &msg);
         // setpoint services
         bool setDepth(motion_controller::SetDepthRequest & request, motion_controller::SetDepthResponse & response);
 
@@ -100,7 +101,7 @@ namespace motion_controller {
                 node("motion_controller"),
                 throttlePublisher(node.advertise<ros_esccontrol::ESCThrottle>("/esccontrol/esc_throttle", QUEUE_SIZE)),
                 imuSubscriber(node.subscribe("/ngimu/euler", QUEUE_SIZE, &TurtleMotion::chatterIMUEuler, this)),
-//echoSubscriber(node.subscribe("")),
+                echoSubscriber(node.subscribe("br_echo", QUEUE_SIZE, &TurtleMotion::chatterEcho,this)),
                 desiredRoll(0),
                 desiredPitch(0),
                 desiredYaw(0),
