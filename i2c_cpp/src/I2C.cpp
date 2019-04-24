@@ -85,7 +85,6 @@ std::vector<uint8_t> I2C::read_bytes(size_t numBytes)
 	if(fd == -1)
 	{
 		throw I2CException("Device File not available. Aborting read");
-		return {};
 	}
 	
 	uint8_t * byteBuffer = new uint8_t[numBytes];
@@ -141,7 +140,6 @@ void I2C::write_bytes(std::vector<uint8_t> bytes)
 	if(fd == -1)
 	{
 		throw I2CException("Device File not available. Aborting read");
-		return;
 	}
 	
 	if (write(fd, bytes.data(), bytes.size()) != bytes.size()) 
