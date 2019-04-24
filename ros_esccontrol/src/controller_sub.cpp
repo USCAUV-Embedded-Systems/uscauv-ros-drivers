@@ -4,7 +4,7 @@
 
 // calibration values for each ESC
 const static int center_points[] = {1570, 1565, 1570, 1570, 1570, 1570};
-const static int8_t inversions[] = {-1, 1, -1, -1, 1, 1};
+const static int8_t inversions[] = {-1, 1, -1, -1, 1, -1};
 
 // "radius" of the PWM signal sent to the motors -- distanct in us from center point to full forward or reverse
 #define PWM_RADIUS 500
