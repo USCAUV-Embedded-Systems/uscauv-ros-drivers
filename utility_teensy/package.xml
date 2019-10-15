@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>marker_dropper</name>
+  <name>utility_teensy</name>
   <version>0.0.0</version>
-  <description>The marker_dropper package</description>
+  <description>The utility_teensy package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
   <!-- <maintainer email="jane.doe@example.com">Jane Doe</maintainer> -->
-  <maintainer email="nvidia@todo.todo">nvidia</maintainer>
+  <maintainer email="pedro@todo.todo">pedro</maintainer>
 
 
   <!-- One license tag required, multiple allowed, one license per tag -->
@@ -19,7 +19,7 @@
   <!-- Url tags are optional, but multiple are allowed, one per tag -->
   <!-- Optional attribute type can be: website, bugtracker, or repository -->
   <!-- Example: -->
-  <!-- <url type="website">http://wiki.ros.org/ros_marker_dropper</url> -->
+  <!-- <url type="website">http://wiki.ros.org/utility_teensy</url> -->
 
 
   <!-- Author tags are optional, multiple are allowed, one per tag -->
@@ -49,27 +49,15 @@
   <!-- Use doc_depend for packages you need only for building documentation: -->
   <!--   <doc_depend>doxygen</doc_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
-  <build_depend>i2c_cpp</build_depend>
   <build_depend>roscpp</build_depend>
   <build_depend>rospy</build_depend>
   <build_depend>std_msgs</build_depend>
-  <build_depend>message_generation</build_depend>
-  <!--if something goes wrong try this instead of all the stuff below this
-  comment but above the export tag:
-  <run_depend>roscpp</run_depend>
-  <run_depend>rospy</run_depend>
-  <run_depend>std_msgs</run_depend>
--->
-  <build_export_depend>i2c_cpp</build_export_depend>
   <build_export_depend>roscpp</build_export_depend>
   <build_export_depend>rospy</build_export_depend>
   <build_export_depend>std_msgs</build_export_depend>
-  
-  <exec_depend>i2c_cpp</exec_depend>
   <exec_depend>roscpp</exec_depend>
   <exec_depend>rospy</exec_depend>
   <exec_depend>std_msgs</exec_depend>
-  <exec_depend>message_runtime</exec_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->
